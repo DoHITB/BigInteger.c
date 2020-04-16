@@ -1,4 +1,4 @@
-/*
+/* 
  * BigInteger.c
  *
  *  Created on: 18 ene. 2019
@@ -15,9 +15,9 @@ int MAX_LENGTH = 512;
 float BI_VERSION = 1.0;
 
 /*
- * Función initialize
+ * FunciÃ³n initialize
  *
- * Da valores a ciertos datos útiles.
+ * Da valores a ciertos datos Ãºtiles.
  */
 void _BI_initialize() {
 	_ZERO = newBI("0");
@@ -31,7 +31,7 @@ void _BI_initialize() {
 
 
 /*
- * Función newBI.
+ * FunciÃ³n newBI.
  *
  * Genera un nuevo dato BI a partir del string que recibe como entrada.
  * Se cargan en orden inverso para permitir el crecimiento de manera sencilla.
@@ -59,9 +59,9 @@ struct BigInteger newBI(char* s){
 }
 
 /*
- * Función add. Usar para sumar dos números.
+ * FunciÃ³n add. Usar para sumar dos nÃºmeros.
  *
- * Realiza la operación de suma, teniendo en cuenta los signos de los números.
+ * Realiza la operaciÃ³n de suma, teniendo en cuenta los signos de los nÃºmeros.
  *
  * Si los signos son iguales, hace una suma, sino, una resta.
  */
@@ -93,9 +93,9 @@ void add(struct BigInteger *a, struct BigInteger b){
 }
 
 /*
- * Función addition.
+ * FunciÃ³n addition.
  *
- * Simula la operación a = a + b
+ * Simula la operaciÃ³n a = a + b
  */
 void addition(struct BigInteger *a, struct BigInteger b){
 	//asumimos que a tiene la mayor longitud
@@ -109,18 +109,18 @@ void addition(struct BigInteger *a, struct BigInteger b){
 
 	int i = 0;
 
-	//si no es así, rectificamos
+	//si no es asÃ­, rectificamos
 	if(b.count > limit){
 		limit = b.count;
 		min = a->count;
 		move = 1;
 	}
 
-	//sumamos los dígitos que coinciden
+	//sumamos los dÃ­gitos que coinciden
 	for(;i <= min;i++)
 		a->n[i] += b.n[i];
 
-	//los dígitos que no coinciden los traspasamos
+	//los dÃ­gitos que no coinciden los traspasamos
 	if(move == 1){
 		for(;i <= limit;i++)
 			a->n[i] = b.n[i];
@@ -133,7 +133,7 @@ void addition(struct BigInteger *a, struct BigInteger b){
 }
 
 /*
- * Función carryAdd.
+ * FunciÃ³n carryAdd.
  *
  * Gestiona el acarreo de la suma. Si hay movimiento de datos, se mueve el valor 1 a ret.
  * De esta manera, podemos llamar hasta que no haya cambios en el acarreo.
@@ -157,10 +157,10 @@ void carryAdd(struct BigInteger *a){
 			acc = a->n[i] / 10;
 
 			if (acc > 0) {
-				//normalizamos el número
+				//normalizamos el nÃºmero
 				a->n[i] = a->n[i] % 10;
 				
-				//si es el primer dígito del que hacemos acarreo, lo guardamos
+				//si es el primer dÃ­gito del que hacemos acarreo, lo guardamos
 				if (ret == 0)
 					m = i + 1;
 
@@ -175,7 +175,7 @@ void carryAdd(struct BigInteger *a){
 			else {
 				a->n[++a->count] = acc;
 
-				//si es el primer dígito del que hacemos acarreo, lo guardamos
+				//si es el primer dÃ­gito del que hacemos acarreo, lo guardamos
 				if (ret == 0)
 					m = i + 1;
 
@@ -186,9 +186,9 @@ void carryAdd(struct BigInteger *a){
 }
 
 /*
- * Función sub. Usar para restar dos números.
+ * FunciÃ³n sub. Usar para restar dos nÃºmeros.
  *
- * Simula la operación a = a - b.
+ * Simula la operaciÃ³n a = a - b.
  *
  * Si len(a) < len(b), se intercambian los valores
  */
@@ -236,7 +236,7 @@ void sub(struct BigInteger *a, struct BigInteger b){
 }
 
 /*
- * Función subrtact.
+ * FunciÃ³n subrtact.
  *
  * Realiza la resta.
  */
@@ -244,11 +244,11 @@ void subtract(struct BigInteger *a, struct BigInteger *b, struct BigInteger *ret
 	int i = 0;
 	int accType = 0;
 
-	//restamos los dígitos comunes
+	//restamos los dÃ­gitos comunes
 	for(;i <= b->count;i++)
 		a->n[i] -= b->n[i];
 
-	//si el último dígito es negativo
+	//si el Ãºltimo dÃ­gito es negativo
 	if(a->n[a->count] < 0)
 		accType = 1;
 
@@ -259,10 +259,10 @@ void subtract(struct BigInteger *a, struct BigInteger *b, struct BigInteger *ret
 }
 
 /*
- * Función carrySub.
+ * FunciÃ³n carrySub.
  *
  * Gestiona el acarreo de la resta. Si carryType = 0, el acarreo
- * se gestiona como a = 10 + a; sino, se invierte el signo (excepto al último dígito)
+ * se gestiona como a = 10 + a; sino, se invierte el signo (excepto al Ãºltimo dÃ­gito)
  */
 void carrySub(struct BigInteger *a, int carryType){
 	int i;
@@ -276,15 +276,15 @@ void carrySub(struct BigInteger *a, int carryType){
 
 		if(carryType == 0){
 			for(i = m;i <= a->count; i++){
-				//restamos el acarreo al número
+				//restamos el acarreo al nÃºmero
 				a->n[i] -= acc;
 
 				if(a->n[i] < 0){
-					//normalizamos el número
+					//normalizamos el nÃºmero
 					a->n[i] += 10;
 					acc = 1;
 
-					//si es el primer dígito del que hacemos acarreo, lo guardamos
+					//si es el primer dÃ­gito del que hacemos acarreo, lo guardamos
 					if (ret == 0)
 						m = i + 1;
 
@@ -294,20 +294,20 @@ void carrySub(struct BigInteger *a, int carryType){
 				}
 			}
 		}else{
-			//en esta opción, no es necesario pasar una segunda vez por acarreos.
+			//en esta opciÃ³n, no es necesario pasar una segunda vez por acarreos.
 			for(i = 0;i < a->count;i++)
 				if(a->n[i] < 0)
-					//normalizamos el número
+					//normalizamos el nÃºmero
 					a->n[i] = a->n[i] * -1;
 		}
 
-		//contamos de nuevo los dígitos
+		//contamos de nuevo los dÃ­gitos
 		recount(a);
 	}while(ret > 0);
 }
 
 /*
- * Función recount.
+ * FunciÃ³n recount.
  *
  * Recuenta las cifras, para ver si hay que disminuir el conteo.
  */
@@ -321,9 +321,9 @@ void recount(struct BigInteger *a){
 }
 
 /*
- * Función hardEquals.
+ * FunciÃ³n hardEquals.
  *
- * Compara dos números. Devuelve 0 si "a" = "b"; 1 si "a" > "b"; 2 si "a" < "b".
+ * Compara dos nÃºmeros. Devuelve 0 si "a" = "b"; 1 si "a" > "b"; 2 si "a" < "b".
  */
 void hardEquals(struct BigInteger a, struct BigInteger b, int *ret){
 	int i;
@@ -345,17 +345,17 @@ void hardEquals(struct BigInteger a, struct BigInteger b, int *ret){
 		//a < 0, b >= 0, por tanto a < b
 		*ret = 2;
 	}else {
-		//comparten signo. Hacemos comparación manual
+		//comparten signo. Hacemos comparaciÃ³n manual
 		*ret = 0;
 
 		if (a.count < b.count)
-			//si "a" tiene menos dígitos que "b"
+			//si "a" tiene menos dÃ­gitos que "b"
 			* ret = 2;
 		else if (a.count > b.count)
-			//si "a" tiene más dítigos que "b"
+			//si "a" tiene mÃ¡s dÃ­tigos que "b"
 			* ret = 1;
 		else {
-			//tienen los mismos dígitos. Comparamos uno a uno.
+			//tienen los mismos dÃ­gitos. Comparamos uno a uno.
 			for (i = a.count; i >= 0; i--) {
 				if (a.n[i] < b.n[i])
 					* ret = 2;
@@ -380,9 +380,9 @@ void hardEquals(struct BigInteger a, struct BigInteger b, int *ret){
 
 
 /*
- * Función mul. Función para multiplicar dos números.
+ * FunciÃ³n mul. FunciÃ³n para multiplicar dos nÃºmeros.
  *
- * Simula la operación a = a * b
+ * Simula la operaciÃ³n a = a * b
  */
 void mul(struct BigInteger *a, struct BigInteger b){
 	int sig;
@@ -398,14 +398,14 @@ void mul(struct BigInteger *a, struct BigInteger b){
 
 	hardEquals(*a, zero, &comp);
 
-	//si a = 0, no hace falta cálculo.
+	//si a = 0, no hace falta cÃ¡lculo.
 	if (comp == 0) {
 		calc = 1;
 	}
 
 	hardEquals(b, zero, &comp);
 
-	//si b = 0, no hace falta cálculo.
+	//si b = 0, no hace falta cÃ¡lculo.
 	if (comp == 0) {
 		*a = zero;
 		calc = 1;
@@ -452,7 +452,7 @@ void mul(struct BigInteger *a, struct BigInteger b){
 	table->status[8] = 0;
 	table->status[9] = 0;
 
-	//si el número no está ya calculado, lo calculamos
+	//si el nÃºmero no estÃ¡ ya calculado, lo calculamos
 	if (calc == 0) {
 		//realizamos los productos parciales
 		for (i = 0; i <= b.count; i++) {
@@ -496,9 +496,9 @@ void mul(struct BigInteger *a, struct BigInteger b){
 }
 
 /*
- * Función pMul.
+ * FunciÃ³n pMul.
  *
- * Efectúa una multiplicación parcial de a y b
+ * EfectÃºa una multiplicaciÃ³n parcial de a y b
  */
 void pMul(int pos, struct BigInteger *part){
 	int i = part->count + pos;
@@ -517,9 +517,9 @@ void pMul(int pos, struct BigInteger *part){
 }
 
 /*
- * Función dvs. Función para dividir dos números.
+ * FunciÃ³n dvs. FunciÃ³n para dividir dos nÃºmeros.
  *
- * Simula la operación a = a / b
+ * Simula la operaciÃ³n a = a / b
  */
 void dvs(struct BigInteger *a, struct BigInteger b){
 	struct BigInteger temp;
@@ -554,7 +554,7 @@ void dvs(struct BigInteger *a, struct BigInteger b){
 		//si a < b, a / b = 0
 		*a = temp;
 	else if(comp == 1){
-		//si a > b, buscamos un número que solucione ax = n
+		//si a > b, buscamos un nÃºmero que solucione ax = n
 		hardEquals(b, one, &comp);
 
 		if(comp == 0){
@@ -571,9 +571,9 @@ void dvs(struct BigInteger *a, struct BigInteger b){
 }
 
 /*
- * Función divide.
+ * FunciÃ³n divide.
  *
- * Realiza la división utilizando el teorema de Bolzano
+ * Realiza la divisiÃ³n utilizando el teorema de Bolzano
  */
 void divide(struct BigInteger *a, struct BigInteger b){
 	struct BIT *table = malloc(sizeof(struct BIT));
@@ -613,8 +613,8 @@ void divide(struct BigInteger *a, struct BigInteger b){
 	currentBIT = 1;
 
 	/*
-	 * Nos quedamos con los "b.count" primeros dígitos. Si "b" tiene un único
-	 * dígito, no movemos nada, porque ya moveremos el siguiente dígito más adelante
+	 * Nos quedamos con los "b.count" primeros dÃ­gitos. Si "b" tiene un Ãºnico
+	 * dÃ­gito, no movemos nada, porque ya moveremos el siguiente dÃ­gito mÃ¡s adelante
 	 */
 	if (b.count > 0) {
 		for(;i < b.count;i++)
@@ -628,7 +628,7 @@ void divide(struct BigInteger *a, struct BigInteger b){
 	if (dTemp.count == 0)
 		--dTemp.count;
 
-	//si "b" tiene una cifra, b.len será 0 pero tenemos que restar una cifra igualmente
+	//si "b" tiene una cifra, b.len serÃ¡ 0 pero tenemos que restar una cifra igualmente
 	if (b.count == 0)
 		mLen = len - 1;
 	else
@@ -650,9 +650,9 @@ void divide(struct BigInteger *a, struct BigInteger b){
 		x = currentBIT;
 
 		if (eq == 1) {
-			//si dTemp > max, partimos de ese valor y hasta el máximo.
+			//si dTemp > max, partimos de ese valor y hasta el mÃ¡ximo.
 			
-			//recuperamos el último BI
+			//recuperamos el Ãºltimo BI
 			biTemp = table->BI[x];
 			added = 0;
 
@@ -660,7 +660,7 @@ void divide(struct BigInteger *a, struct BigInteger b){
 				//le sumamos la base
 				add(&biTemp, b);
 
-				//lo añadimos a BIT, si no hemos llenado la tabla (rellenamos siempre por adelantado)
+				//lo aÃ±adimos a BIT, si no hemos llenado la tabla (rellenamos siempre por adelantado)
 				if (currentBIT < 9) {
 					table->BI[++currentBIT] = biTemp;
 					table->status[currentBIT] = 1;
@@ -676,10 +676,10 @@ void divide(struct BigInteger *a, struct BigInteger b){
 					res = currentBIT;
 					x = 99;
 				}else if (eq == 2) {
-					//si dTemp < max, según el teorema de Bolzano, hemos pasado por dTemp = max, 
+					//si dTemp < max, segÃºn el teorema de Bolzano, hemos pasado por dTemp = max, 
 					//por tanto, el valor correcto es el anterior
-					//si no hemos llegado al final de la tabla, será el índice anterior
-					//si hemos llegado al final de la tabla, será el índice actual
+					//si no hemos llegado al final de la tabla, serÃ¡ el Ã­ndice anterior
+					//si hemos llegado al final de la tabla, serÃ¡ el Ã­ndice actual
 					if (added == 1)
 						res = (currentBIT - 1);
 					else
@@ -705,7 +705,7 @@ void divide(struct BigInteger *a, struct BigInteger b){
 					x = -99;
 				}
 				else if (eq == 1) {
-					//si dTemp > max, según el teorema de Bolzano, hemos pasado por dTemp = max, 
+					//si dTemp > max, segÃºn el teorema de Bolzano, hemos pasado por dTemp = max, 
 					//por tanto, el valor correcto es el siguiente
 					res = x;
 					x = -99;
@@ -728,9 +728,9 @@ void divide(struct BigInteger *a, struct BigInteger b){
 }
 
 /*
- * Función BISQRT.
+ * FunciÃ³n BISQRT.
  *
- * Realiza la raíz cuadrada de a y la retorna como BI.
+ * Realiza la raÃ­z cuadrada de a y la retorna como BI.
  */
 struct BigInteger BISQRT(struct BigInteger a) {
 	struct BigInteger ret = newBI("0");
@@ -757,9 +757,9 @@ struct BigInteger BISQRT(struct BigInteger a) {
 }
 
 /*
- * Función pow.
+ * FunciÃ³n pow.
  *
- * Simula la operación a = a^p
+ * Simula la operaciÃ³n a = a^p
  */
 void pow(struct BigInteger *a, int p) {
 	int z = 1;
@@ -780,7 +780,7 @@ void pow(struct BigInteger *a, int p) {
 }
 
 /*
- * Función rev.
+ * FunciÃ³n rev.
  *
  * Da la vuelta a un BigInteger
  */
@@ -797,9 +797,9 @@ void rev(struct BigInteger *a){
 }
 
 /*
- * Función makeBase
+ * FunciÃ³n makeBase
  *
- * simula la operación base = b * 10^length
+ * simula la operaciÃ³n base = b * 10^length
  */
 void makeBase(struct BigInteger* base, struct BigInteger b, int length, int* start){
 	int i = 0;
@@ -818,7 +818,7 @@ void makeBase(struct BigInteger* base, struct BigInteger b, int length, int* sta
 }
 
 /*
- * Función shift.
+ * FunciÃ³n shift.
  *
  * Desplaza un BI en "start" posiciones
  */
@@ -834,9 +834,9 @@ void shift(struct BigInteger* base, int start){
 }
 
 /*
- * Función showError.
+ * FunciÃ³n showError.
  *
- * Muestra un error en base al índice que se le pasa
+ * Muestra un error en base al Ã­ndice que se le pasa
  */
 void showError(int k){
 	if(k == 1)
@@ -844,7 +844,7 @@ void showError(int k){
 }
 
 /*
- * Función toString.
+ * FunciÃ³n toString.
  *
  * Escribe en pantalla el BigInteger
  */
@@ -854,9 +854,9 @@ void toString(struct BigInteger b){
 }
 
 /*
- * Función append
+ * FunciÃ³n append
  *
- * Sinónimo de la función pAppend para poder trabajar con b como
+ * SinÃ³nimo de la funciÃ³n pAppend para poder trabajar con b como
  * puntero, o con b como valor.
  */
 void append(struct BigInteger *a, struct BigInteger b){
@@ -864,15 +864,15 @@ void append(struct BigInteger *a, struct BigInteger b){
 }
 
 /*
- * Función pAppend.
+ * FunciÃ³n pAppend.
  *
- * Adjunta un BigInteger a otro. OJO, esta función se debe usar en el orden
+ * Adjunta un BigInteger a otro. OJO, esta funciÃ³n se debe usar en el orden
  * contrario al habitual. Si queremos unir "1" y "2" para tener "12",
- * a = 2 y b = 1 (ya que los array de BigInteger van al revés.
+ * a = 2 y b = 1 (ya que los array de BigInteger van al revÃ©s.
  */
 void pAppend(struct BigInteger *a, struct BigInteger *b){
 	//si b = 0, no hacemos nada
-	//no usamos equals para no dañar el rendimiento
+	//no usamos equals para no daÃ±ar el rendimiento
 	if (b->count == 0 && b->n[0] == 0) {
 		return;
 	}
@@ -902,7 +902,7 @@ void pAppend(struct BigInteger *a, struct BigInteger *b){
 }
 
 /*
- * Función clean.
+ * FunciÃ³n clean.
  *
  * Limpia la estructura
  */
@@ -914,9 +914,9 @@ void clean(struct BigInteger *a){
 }
 
 /*
- * Función signum.
+ * FunciÃ³n signum.
  *
- * Devuelve la cantidad de datos negativos que hay en la operación.
+ * Devuelve la cantidad de datos negativos que hay en la operaciÃ³n.
  */
 int signum(struct BigInteger* a, struct BigInteger b){
 	int ret = 0;
