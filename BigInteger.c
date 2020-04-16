@@ -20,15 +20,14 @@ float BI_VERSION = 1.0;
  * Da valores a ciertos datos útiles.
  */
 void _BI_initialize() {
-	_ZERO = newBI("0");
-	_ONE  = newBI("1");
+  _ZERO = newBI("0");
+  _ONE  = newBI("1");
 	_TEN  = newBI("10");
 	_HUND = newBI("100");
 	_MIN  = newBI("0");
 
 	sub(&_MIN, _ONE);
 }
-
 
 /*
  * Función newBI.
@@ -378,7 +377,6 @@ void hardEquals(struct BigInteger a, struct BigInteger b, int *ret){
 	}
 }
 
-
 /*
  * Función mul. Función para multiplicar dos números.
  *
@@ -476,7 +474,6 @@ void mul(struct BigInteger *a, struct BigInteger b){
 
 			pMul(i, &part[i]);
 		}
-
 
 		//realizamos el sumatorio
 		for (i = 1; i <= b.count; i++) {
@@ -634,7 +631,6 @@ void divide(struct BigInteger *a, struct BigInteger b){
 	else
 		mLen = len;
 
-
 	//por cada cifra decimal que hemos generado
 	for (i = 0; i <= len; i++) {
 		//hacemos BI temporal
@@ -651,7 +647,6 @@ void divide(struct BigInteger *a, struct BigInteger b){
 
 		if (eq == 1) {
 			//si dTemp > max, partimos de ese valor y hasta el máximo.
-			
 			//recuperamos el último BI
 			biTemp = table->BI[x];
 			added = 0;
