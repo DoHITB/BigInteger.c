@@ -200,7 +200,7 @@ void sub(struct BigInteger *a, struct BigInteger b){
 
   //if(a->count < b.count){
   if(comp == 2){
-	  sub(&b, aux);
+    sub(&b, aux);
 
     //cambiamos el signo
     b.n[b.count] *= -1;
@@ -281,7 +281,7 @@ void carrySub(struct BigInteger *a, int carryType){
         if(a->n[i] < 0){
           //normalizamos el número
           a->n[i] += 10;
-	        acc = 1;
+          acc = 1;
 
           //si es el primer dígito del que hacemos acarreo, lo guardamos
           if (ret == 0)
@@ -676,8 +676,8 @@ void divide(struct BigInteger *a, struct BigInteger b){
           else
             res = currentBIT;
 
-	        x = 99;
-	      }
+          x = 99;
+        }
       }
     }else if (eq == 0) {
       //si dTemp = max, ya tenemos el valor
@@ -741,7 +741,7 @@ struct BigInteger BISQRT(struct BigInteger a) {
   }while (stop == 2);
 
   if(stop > 0)
-	  sub(&ret, one);
+    sub(&ret, one);
 
   return ret;
 }
@@ -881,7 +881,7 @@ void pAppend(struct BigInteger *a, struct BigInteger *b){
     for (; i <= a->count; i++)
       aux.n[aux.count++] = 0;
 
-	  //traspasamos "b" a aux
+    //traspasamos "b" a aux
     for (i = 0; i <= b->count; i++)
       aux.n[aux.count++] = b->n[i];
 
