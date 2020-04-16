@@ -10,18 +10,18 @@
 
 //struct
 struct BigInteger{
-	int count;
-	int n[512];
+  int count;
+  int n[512];
 };
 
-//BIT, Buffer para multiplicaci髇 y divisi髇
+//BIT, Buffer para multiplicaci贸n y divisi贸n
 struct BIT{
-	struct BigInteger BI[10];
-	int status[10];
+  struct BigInteger BI[10];
+  int status[10];
 };
 
 /*
- * Variables 鷗iles
+ * Variables 煤tiles
  */
 struct BigInteger _ZERO;
 struct BigInteger _ONE;
@@ -52,18 +52,18 @@ void carrySub(struct BigInteger *a, int carryType);
 void recount(struct BigInteger *a);
 void hardEquals(struct BigInteger a, struct BigInteger b, int *ret);
 
-//Multiplicaci髇
+//Multiplicaci贸n
 void mul(struct BigInteger *a, struct BigInteger b);
 void pMul(/*struct BigInteger *a, int x, */int pos, struct BigInteger *part);
 
-//Divisi髇
+//Divisi贸n
 void dvs(struct BigInteger *a, struct BigInteger b);
 void divide(struct BigInteger *a, struct BigInteger b);
 void makeBase(struct BigInteger *base, struct BigInteger b, int length, int* start);
 void shift(struct BigInteger* base, int start);
 void rev(struct BigInteger *a);
 
-//Ra韟 Cuadrada
+//Ra铆z Cuadrada
 struct BigInteger BISQRT(struct BigInteger a);
 
 //Potencia
