@@ -12,6 +12,8 @@ This architecture was made during my Degree final paper (TFG, in Spain), to cove
    * Added new validations on BI creation.
    * New function "BImemcpy" to retreive useful values of BigInteger.
    * New function "validateBI" to validate the internal structure of a BI void pointer.
+ * v1.11 (beta)
+   * Added memory cleansing before "return" statements
 
 ## How To Configure it?
 * Download both header and source code file
