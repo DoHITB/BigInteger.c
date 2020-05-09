@@ -1,17 +1,23 @@
 # BigInteger.c
 C Based model to work with Big Integers
 
-Correctly tested working with up to 4096 digits integer.
+Correctly tested working with up to 4096 digits integer (on the master branch).
 
 This architecture was made during my Degree final paper (TFG, in Spain), to cover an RSA cryptoanalsys.
 
+## Changelog
+ * v1.1 (beta)
+   * Review variables and functions, making it "static" when convenient.
+   * Changing all pointer references to "void" to avoid memory leakage.
+   * Added new validations on BI creation.
+   * New function "BImemcpy" to retreive useful values of BigInteger.
+   * New function "validateBI" to validate the internal structure of a BI void pointer.
 
 ## How To Configure it?
 * Download both header and source code file
 * Change "int MAX_LENGTH = 512;" to adjust desired max length on source code file. 
 * Change "int n[512];" to same value as previous point to allow storage of digits
 * Initially, it worked with 4096 digits, so there will be no problem to use it - it was downgraded to 512 in order to preserve som RAM.
-
 
 ## How it works?
 * BigInteger (or just BI) works on the basis of 1:1 integer - digit relation. It means that every digit of a BI reaches the space of an integer.
@@ -31,21 +37,19 @@ This architecture was made during my Degree final paper (TFG, in Spain), to cove
   * Powering (pow function)
 * Debugging and others
   * Display function (toString function)
-  * Useful variables
+  * Useful variables (via BImemcpy function)
     * Minus One (_MIN)
     * Zero (_ZERO)
     * One (_ONE)
     * Ten (_TEN)
     * One Hundred (_HUN)
-  * Appending function (append and pAppend functions)
-  * Compare function (hardEquals function)
-  * Initialize and create BigInteger (newBI and clean functions)
+  * Appending function (append function)
+  * Compare function (equals function)
+  * Initialize and create BigInteger (newBI function)
   
   
 ## Disclamer
-Use only the above mentioned functions in order to perform operations, as other functions such as "addition", or "subtract" are meant for internal use of BI.
-
-Using any of the non-listed functions is discouraged, and does not assure a correct result.
+This version is on beta and has not been tested yet. Use at your own risk
 
 
 ## Want to know more?
