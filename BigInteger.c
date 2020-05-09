@@ -11,6 +11,8 @@
  *      - Añadidas validaciones en las creaciones de BigInteger
  *      - Nueva función BImemcpy para recuperar valores útiles de BigInteger
  *      - Nueva función validateBI para validar la estructura de un BigInteger pasado como puntero
+ *    v1.11
+ *      - Añadida limpieza de memoria previo a los returns
  */
 #include "stdio.h"
 #include "conio.h"
@@ -20,7 +22,7 @@
 #include "BigInteger.h"
 
 int MAX_LENGTH = 4096;
-float BI_VERSION = 1.1f;
+float BI_VERSION = 1.11f;
 
 
 /*
@@ -833,6 +835,13 @@ void dvs(void *va, void *vb){
 
     if(comp == 0){
       //si b = 1, no hay nada que calcular
+      //liberamos memoria
+      free(a);
+      free(b);
+      free(temp);
+  //  free(aux);
+      free(one);
+
       return;
     }else
       divide(a, b);
@@ -1219,6 +1228,10 @@ void pow(void *va, int p) {
     BImemcpy(a, 1);
   else if (p == 1)
     //n^1 = n
+	//limpiamos memoria
+    free(a);
+    free(res);
+
     return;
   else {
     //res = *a;
@@ -1365,8 +1378,14 @@ static void pAppend(void *va, void *vb){
 
   //si b = 0, no hacemos nada
   //no usamos equals para no dañar el rendimiento
-  if (b->count == 0 && b->n[0] == 0) 
+  if (b->count == 0 && b->n[0] == 0){ 
+    //libreamos memoria
+    free(a);
+    free(b);
+    free(aux);
+
     return;
+  }
 
   aux->count = 0;
 
