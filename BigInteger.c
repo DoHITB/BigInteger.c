@@ -1224,7 +1224,6 @@ void pow(void *va, int p) {
   int i = 0;
   struct BigInteger* tmp = (struct BigInteger*)malloc(sizeof(struct BigInteger));
 
-
   if (a == NULL || res == NULL)
     showError(20);
 
@@ -1295,7 +1294,6 @@ void pow(void *va, int p) {
 
       if (d2b[i] == 1)
         mul(res, tmp);
-      
     }
 
     memcpy(a, res, sizeof(struct BigInteger));
