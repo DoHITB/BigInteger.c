@@ -1184,6 +1184,7 @@ void BISQRT(void *va) {
     free(a);
     free(i);
     free(one);
+    free(ret);
 
     return;
   }
