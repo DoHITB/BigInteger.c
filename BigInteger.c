@@ -745,6 +745,7 @@ void mul(void *va, void *vb){
   free(b);
   free(zero);
   free(one);
+  free(min);
 }
 
 /*
@@ -846,7 +847,6 @@ void dvs(void *va, void *vb){
       free(b);
       free(temp);
       free(one);
-      free(min);
 
       return;
     }else
@@ -865,7 +865,6 @@ void dvs(void *va, void *vb){
   free(b);
   free(temp);
   free(one);
-  free(min);
 }
 
 /*
