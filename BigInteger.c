@@ -1297,7 +1297,6 @@ void pow(void *va, int p) {
     }
 
     memcpy(a, res, sizeof(struct BigInteger));
-
   }
 
   //ajustamos resultado
