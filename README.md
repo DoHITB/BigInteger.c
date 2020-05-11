@@ -14,6 +14,11 @@ This architecture was made during my Degree final paper (TFG, in Spain), to cove
    * New function "validateBI" to validate the internal structure of a BI void pointer.
  * v1.11 (beta)
    * Added memory cleansing before "return" statements
+ * v1.2 (beta)
+   * Added new behaviour for better performance on "pow" function
+ * v1.3 (beta)
+   * Patch to avoid memory leackage
+   * Deleted "time.h" library (unnecesary)
 
 ## How To Configure it?
 * Download both header and source code file
