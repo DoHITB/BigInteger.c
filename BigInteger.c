@@ -15,16 +15,20 @@
  *      - Añadida limpieza de memoria previo a los returns
  *    v1.2
  *      - Añadida mejora de rendimiento para función pow
+ *    v1.3
+ *      - Parche para evitar acumulación de memoria
+ *        · Liberar memoria en función validateBI
+ *        · Añadir "free(min)" en función mul
+ *      - Eliminada librería time.h (innecesaria)
  */
 #include "stdio.h"
 #include "conio.h"
 #include "stdlib.h"
 #include "string.h"
-#include "time.h"
 #include "BigInteger.h"
 
 int MAX_LENGTH = 4096;
-float BI_VERSION = 1.2f;
+float BI_VERSION = 1.3f;
 
 
 /*
@@ -841,8 +845,8 @@ void dvs(void *va, void *vb){
       free(a);
       free(b);
       free(temp);
-  //  free(aux);
       free(one);
+      free(min);
 
       return;
     }else
@@ -860,8 +864,8 @@ void dvs(void *va, void *vb){
   free(a);
   free(b);
   free(temp);
-//  free(aux);
   free(one);
+  free(min);
 }
 
 /*
@@ -1538,18 +1542,30 @@ static int signum(void* va, void *vb){
  * Valida que todos los datos del BI sean coherentes
  */
 void validateBI(void* a) {
+  struct BigInteger* temp = (struct BigInteger*)malloc(sizeof(struct BigInteger));
   int* t = (int*)(malloc(sizeof(int)));
   int i = 0;
 
-  if (t == NULL || a == NULL)
+  memcpy(temp, a, sizeof(struct BigInteger));
+
+  if (t == NULL || a == NULL || temp == NULL)
     showError(98);
 
-  t = a;
+  t = temp;
 
-  if (*t < 0 || *t++ > MAX_LENGTH)
+  if (*t < 0 || *t > MAX_LENGTH)
     showError(99);
 
-  for (; i < MAX_LENGTH; i++) 
-    if (*t < 0 || *t++ > 9) 
+  t++;
+
+  for (; i < MAX_LENGTH; i++) {
+    if (*t < 0 || *t > 9)
       showError(99);
+
+    t++;
+  }
+
+  t = temp;
+
+  free(t);
 }
