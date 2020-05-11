@@ -13,6 +13,8 @@
  *      - Nueva función validateBI para validar la estructura de un BigInteger pasado como puntero
  *    v1.11
  *      - Añadida limpieza de memoria previo a los returns
+ *    v1.2
+ *      - Añadida mejora de rendimiento para función pow
  */
 #include "stdio.h"
 #include "conio.h"
@@ -22,7 +24,7 @@
 #include "BigInteger.h"
 
 int MAX_LENGTH = 4096;
-float BI_VERSION = 1.11f;
+float BI_VERSION = 1.2f;
 
 
 /*
@@ -1213,6 +1215,15 @@ void pow(void *va, int p) {
   struct BigInteger *a = (struct BigInteger*)malloc(sizeof(struct BigInteger));
   int z = 1;
   struct BigInteger* res = (struct BigInteger*)malloc(sizeof(struct BigInteger));
+  
+  //1.2: variables de trabajo
+  int d2b[10];
+  int d2bi = 0;
+  int x = 0;
+  int t = p;
+  int i = 0;
+  struct BigInteger* tmp = (struct BigInteger*)malloc(sizeof(struct BigInteger));
+
 
   if (a == NULL || res == NULL)
     showError(20);
@@ -1226,19 +1237,69 @@ void pow(void *va, int p) {
     //n^0 = 1
     //*a = newBI("1", 0);
     BImemcpy(a, 1);
-  else if (p == 1)
+  else if (p == 1) {
     //n^1 = n
-	//limpiamos memoria
+    //limpiamos memoria
     free(a);
     free(res);
+    free(tmp);
 
     return;
-  else {
-    //res = *a;
-    memcpy(res, a, sizeof(struct BigInteger));
+  }else {
+    BImemcpy(res, 1);
 
-    for (; z < p; z++)
-      mul(a, res);
+    /*
+     * 1.2: Factorizamos la potencia en base 2 para poder
+     *      mejorar el rendimiento de la operación
+     *
+     *      Como funciona
+     *       - Convertimos el exponente en base 2, y almacenamos
+     *         los datos en un array.
+     *
+     *       - Por cada iteración, vamos calculando a^2^i, es decir
+     *         a^0, a^2, a^4, a^8, a^16, ...
+     *
+     *       - Si la posición de d2b es 1, multiplicamos, y de esta manera
+     *         obtenemos el resultado.
+     *
+     *         Por ejemplo 8^12
+     *           12 = 1100 (aunque se guarda como 0011) ==> 4 + 8
+     *           8^12 = 8^4 * 8^8 = 8^(4+8)
+     *
+     *         De esta manera, hacemos únicamente 8 multiplicaciones en lugar de 12
+     *         (para este ejemplo). En números más grandes la diferencia sería aún mayor
+     */
+    //conversión de decimal a binario
+    while (t > 0 && d2bi < 10) {
+      //dividimos el número por dos
+      x = t / 2;
+
+      //guardamos el resto en d2b
+      d2b[d2bi++] = (t - x * 2);
+
+      //reasignamos el valor
+      t = x;
+    }
+
+    //si el número es muy grande, damos error
+    if (t > 0 && d2bi >= 10)
+      showError(25);
+
+    //iteramos sobre el número binario
+    for (; i < d2bi; i++) {
+      //calculamos (a^(2^i))
+      if (i == 0)
+        memcpy(tmp, a, sizeof(struct BigInteger));
+      else
+        mul(tmp, tmp);
+
+      if (d2b[i] == 1)
+        mul(res, tmp);
+      
+    }
+
+    memcpy(a, res, sizeof(struct BigInteger));
+
   }
 
   //ajustamos resultado
@@ -1247,8 +1308,8 @@ void pow(void *va, int p) {
   //limpiamos memoria
   free(a);
   free(res);
+  free(tmp);
 }
-
 /*
  * Función showError.
  *
