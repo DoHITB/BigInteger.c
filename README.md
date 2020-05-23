@@ -5,6 +5,7 @@ Correctly tested working with up to 4096 digits integer (on the master branch).
 
 This architecture was made during my Degree final paper (TFG, in Spain), to cover an RSA cryptoanalsys.
 
+
 ## Changelog
  * v1.1 (beta)
    * Review variables and functions, making it "static" when convenient.
@@ -19,12 +20,23 @@ This architecture was made during my Degree final paper (TFG, in Spain), to cove
  * v1.3 (beta)
    * Patch to avoid memory leackage
    * Deleted "time.h" library (unnecesary)
+ * v.4 (bet)
+   * Changed "BIQSRT" function for "nqrt", that makes "n-root"
+   * Delete "static" from BIT (unnecesary)
+   * Created wrapper function for "add" ,"sub", and "mul" for internal use.
+   * Arranged header variable names to naming convention
+   * Function "signum" modified to increase performance. It now works with two int.
+     * 90,566% memory usage reduction on nqrt via wrappers.
+     * 53,656% performance increase on nqrt via wrappers.
+     * (nqrt is used to measurement as nqrt -> pow -> mul -> pmul -> add is the longest function chain available)
+
 
 ## How To Configure it?
 * Download both header and source code file
 * Change "int MAX_LENGTH = 512;" to adjust desired max length on source code file. 
 * Change "int n[512];" to same value as previous point to allow storage of digits
 * Initially, it worked with 4096 digits, so there will be no problem to use it - it was downgraded to 512 in order to preserve som RAM.
+
 
 ## How it works?
 * BigInteger (or just BI) works on the basis of 1:1 integer - digit relation. It means that every digit of a BI reaches the space of an integer.
@@ -40,7 +52,7 @@ This architecture was made during my Degree final paper (TFG, in Spain), to cove
   * Multiplication (mul function)
   * Division (dvs function)
 * BI also provides two advanced operations
-  * Square root (BISQRT function)
+  * n-root (nqrt function)
   * Powering (pow function)
 * Debugging and others
   * Display function (toString function)
