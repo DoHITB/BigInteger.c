@@ -11,24 +11,34 @@
  *      - Añadidas validaciones en las creaciones de BigInteger
  *      - Nueva función BImemcpy para recuperar valores útiles de BigInteger
  *      - Nueva función validateBI para validar la estructura de un BigInteger pasado como puntero
- *    v1.11
- *      - Añadida limpieza de memoria previo a los returns
  *    v1.2
  *      - Añadida mejora de rendimiento para función pow
  *    v1.3
  *      - Parche para evitar acumulación de memoria
- *        · Liberar memoria en función validateBI
- *        · Añadir "free(min)" en función mul
- *      - Eliminada librería time.h (innecesaria)
+ *      - Eliminada librería time.h (inecesaria)
+ *    v1.4
+ *      - Cambio de función BISQRT por nqrt, que realiza n-ésimas potencias.
+ *      - Eliminar "static" de BIT (innecesario)
+ *      - Creada función pAdd, wrapper de add sin validación de punteros para uso interno
+ *      - Creada función pSub, wrapper de sub sin validación de punteros para uso interno
+ *      - Creada función sMul, wrapper de mul sin validación de punteros para uso interno
+ *      - Modificados nombres de parámetros en la cabecera para nomenclatura coherente
+ *      - Eliminado error 19 (referencia innecesaria a BISQRT)
+ *      - Modificada función signum para trabajar con int en lugar de BigInteger.
+ *        ==> Reducido un 90,566% el consumo de memoria de nqrt a través del uso de wrappers
+ *        ==> Aumentado un 53,656% el rendimiento de nqrt a través del uso de wrappers
+ *          ==> Se usa nqrt como referencia debido a que nqrt -> pow -> mul -> pmul -> sum
+ *            Es el camino que más funciones concatena.
  */
 #include "stdio.h"
 #include "conio.h"
 #include "stdlib.h"
 #include "string.h"
+//#include "time.h"
 #include "BigInteger.h"
 
 int MAX_LENGTH = 4096;
-float BI_VERSION = 1.3f;
+float BI_VERSION = 1.4f;
 
 
 /*
@@ -117,27 +127,24 @@ void newBI(void *dst, char* s, int sig){
 }
 
 /*
- * Función add. Usar para sumar dos números.
+ * Función pAdd. Usar para sumar dos números.
  *
  * Realiza la operación de suma, teniendo en cuenta los signos de los números.
  *
  * Si los signos son iguales, hace una suma, sino, una resta.
  */
-void add(void *va, void *vb){
+static void pAdd(void *va, void *vb){
   struct BigInteger* a = (struct BigInteger*)malloc(sizeof(struct BigInteger));
   struct BigInteger* b = (struct BigInteger*)malloc(sizeof(struct BigInteger));
 
   if (a == NULL || b == NULL)
     showError(4);
 
-  //validamos los datos antes de copiarlos
-  validateBI(va);
-  validateBI(vb);
-
   memcpy(a, va, sizeof(struct BigInteger));
   memcpy(b, vb, sizeof(struct BigInteger));
 
-  int sig = signum(a, b);
+  //int sig = signum(a, b);
+  int sig = signum(a->n[a->count], b->n[b->count]);
 
   //normalizamos los operandos
   if(sig == 10)
@@ -156,7 +163,7 @@ void add(void *va, void *vb){
   if (sig == 0 || sig == 11)
     addition(a, b);
   else
-    sub(va, vb);
+    pSub(va, vb);
 
   if(sig == 10 || sig == 11)
     //en estos casos, siempre se le va la vuelta al signo
@@ -168,6 +175,22 @@ void add(void *va, void *vb){
   //liberamos memoria
   free(a);
   free(b);
+}
+
+/*
+ * Función add. Usar para sumar dos números.
+ *
+ * Realiza la operación de suma, teniendo en cuenta los signos de los números.
+ *
+ * Si los signos son iguales, hace una suma, sino, una resta.
+ */
+void add(void *va, void *vb){
+  //validamos los datos antes de tratarlos
+  validateBI(va);
+  validateBI(vb);
+
+  //delegamos en la función estática
+  pAdd(va, vb);
 }
 
 /*
@@ -296,14 +319,14 @@ static void carryAdd(void* va) {
 }
 
 /*
- * Función sub. Usar para restar dos números.
+ * Función pSub. Usar para restar dos números.
  *
  * Simula la operación a = a - b.
  *
  * Si len(a) < len(b), se intercambian los valores
  */
 //void sub(struct BigInteger *a, struct BigInteger b){
-void sub(void* va, void *vb){
+static void pSub(void* va, void *vb){
   int sig;
   int comp;
   //struct BigInteger aux = *a;
@@ -329,7 +352,7 @@ void sub(void* va, void *vb){
   //if(a->count < b.count){
   if(comp == 2){
     //sub(&b, aux);
-    sub(vb, va);
+    pSub(vb, va);
 
     //cambiamos el signo
     b->n[b->count] *= -1;
@@ -341,7 +364,8 @@ void sub(void* va, void *vb){
     a->n[0] = 0;
     a->count = 0;
   }else{
-    sig = signum(a, b);
+    //sig = signum(a, b);
+    sig = signum(a->n[a->count], b->n[b->count]);
 
     //normalizamos los signos
     if(sig == 1)
@@ -357,7 +381,7 @@ void sub(void* va, void *vb){
     if(sig == 0 || sig == 11)
       subtract(a, b, a);
     else 
-      add(a, b);
+      pAdd(a, b);
 
     if(sig == 10 || sig == 11)
       //en estos casos, siempre se le va la vuelta al signo
@@ -370,6 +394,22 @@ void sub(void* va, void *vb){
   //liberamos memoria
   free(a);
   free(b);
+}
+
+/*
+ * Función sub. Usar para restar dos números.
+ *
+ * Simula la operación a = a - b.
+ *
+ * Si len(a) < len(b), se intercambian los valores
+ */
+void sub(void *va, void *vb) {
+  //validamos los punteros antes de tratarlos
+  validateBI(va);
+  validateBI(vb);
+
+  //delegamos en la función estática
+  pSub(va, vb);
 }
 
 /*
@@ -536,7 +576,8 @@ static void hardEquals(void* va, void* vb, int* ret){
    *10: a <  0, b >= 0
    *11: a <  0, b <  0
    */
-  sig = signum(a, b);
+  //sig = signum(a, b);
+  sig = signum(a->n[a->count], b->n[b->count]);
 
   if (sig == 1) {
     //a >= 0, b < 0, por tanto a > b
@@ -584,12 +625,12 @@ static void hardEquals(void* va, void* vb, int* ret){
 
 
 /*
- * Función mul. Función para multiplicar dos números.
+ * Función sMul. Función para multiplicar dos números.
  *
  * Simula la operación a = a * b
  */
 //void mul(struct BigInteger *a, struct BigInteger b){
-void mul(void *va, void *vb){
+static void sMul(void *va, void *vb){
   int sig;
   int i = 0;
   struct BigInteger* part;
@@ -607,10 +648,6 @@ void mul(void *va, void *vb){
 
   if (table == NULL || a == NULL || b == NULL || zero == NULL || one == NULL || min == NULL)
     showError(12);
-
-  //validamos los datos
-  validateBI(va);
-  validateBI(vb);
 
   memcpy(a, va, sizeof(struct BigInteger));
   memcpy(b, vb, sizeof(struct BigInteger));
@@ -639,7 +676,9 @@ void mul(void *va, void *vb){
     calc = 1;
   }
 
-  sig = signum(a, b);
+  //sig = signum(a, b);
+  sig = signum(a->n[a->count], b->n[b->count]);
+
   //normalizamos los operandos
   if(sig == 1)
     b->n[b->count] *= -1;
@@ -724,7 +763,7 @@ void mul(void *va, void *vb){
 
     //realizamos el sumatorio
     for (i = 1; i <= b->count; i++)
-      add(&part[0], &part[i]);
+      pAdd(&part[0], &part[i]);
 
 
     //*a = part[0];
@@ -746,6 +785,20 @@ void mul(void *va, void *vb){
   free(zero);
   free(one);
   free(min);
+}
+
+/*
+ * Función mul. Función para multiplicar dos números.
+ *
+ * Simula la operación a = a * b
+ */
+void mul(void *va, void *vb){
+  //validamos los datos antes de usarlos
+  validateBI(va);
+  validateBI(vb);
+
+  //delegamos en la función estática
+  sMul(va, vb);
 }
 
 /*
@@ -811,7 +864,8 @@ void dvs(void *va, void *vb){
   BImemcpy(temp, 0);
   BImemcpy(one, 1);
 
-  sig = signum(a, b);
+  //sig = signum(a, b);
+  sig = signum(a->n[a->count], b->n[b->count]);
 
   //normalizamos los operandos
   if(sig == 1)
@@ -846,6 +900,7 @@ void dvs(void *va, void *vb){
       free(a);
       free(b);
       free(temp);
+      //  free(aux);
       free(one);
 
       return;
@@ -864,6 +919,7 @@ void dvs(void *va, void *vb){
   free(a);
   free(b);
   free(temp);
+//  free(aux);
   free(one);
 }
 
@@ -971,7 +1027,7 @@ static void divide(void *va, void *vb){
 
       for (; x < 10; x++) {
         //le sumamos la base
-        add(biTemp, b);
+        pAdd(biTemp, b);
 
         //lo añadimos a BIT, si no hemos llenado la tabla (rellenamos siempre por adelantado)
         if (currentBIT < 9) {
@@ -1030,7 +1086,7 @@ static void divide(void *va, void *vb){
     ret->n[len - i] = res;
 
     //restamos
-    sub(dTemp, &table->BI[res]);
+    pSub(dTemp, &table->BI[res]);
   }
 
   ret->count = mLen;
@@ -1152,12 +1208,11 @@ static void rev(void* va) {
 }
 
 /*
- * Función BISQRT.
+ * Función nqrt.
  *
- * Realiza la raíz cuadrada de a y la retorna como BI.
+ * Realiza la raíz enésima de a.
  */
-//struct BigInteger BISQRT(struct BigInteger a) {
-void BISQRT(void *va) {
+void nqrt(void* va, int n) {
   struct BigInteger* a = (struct BigInteger*)malloc(sizeof(struct BigInteger));
   struct BigInteger* ret = (struct BigInteger*)malloc(sizeof(struct BigInteger));
   struct BigInteger* i = (struct BigInteger*)malloc(sizeof(struct BigInteger));
@@ -1168,7 +1223,7 @@ void BISQRT(void *va) {
   int stop = 0;
 
   if (a == NULL || ret == NULL || i == NULL || one == NULL)
-    showError(19);
+    showError(26);
 
   //validamos punteros
   validateBI(va);
@@ -1190,14 +1245,14 @@ void BISQRT(void *va) {
   }
 
   do {
-    add(ret, one);
+    pAdd(ret, one);
     memcpy(i, ret, sizeof(struct BigInteger));
-    mul(i, i);
+    pow(i, n);
     hardEquals(i, a, &stop);
   } while (stop == 2);
 
   if (stop > 0)
-    sub(ret, one);
+    pSub(ret, one);
 
   //ajustamos resultado
   memcpy(va, ret, sizeof(struct BigInteger));
@@ -1208,6 +1263,7 @@ void BISQRT(void *va) {
   free(i);
   free(one);
 }
+
 
 /*
  * Función pow.
@@ -1227,6 +1283,7 @@ void pow(void *va, int p) {
   int t = p;
   int i = 0;
   struct BigInteger* tmp = (struct BigInteger*)malloc(sizeof(struct BigInteger));
+
 
   if (a == NULL || res == NULL)
     showError(20);
@@ -1294,10 +1351,11 @@ void pow(void *va, int p) {
       if (i == 0)
         memcpy(tmp, a, sizeof(struct BigInteger));
       else
-        mul(tmp, tmp);
+        sMul(tmp, tmp);
 
       if (d2b[i] == 1)
-        mul(res, tmp);
+        sMul(res, tmp);
+      
     }
 
     memcpy(a, res, sizeof(struct BigInteger));
@@ -1311,6 +1369,7 @@ void pow(void *va, int p) {
   free(res);
   free(tmp);
 }
+
 /*
  * Función showError.
  *
@@ -1353,8 +1412,8 @@ static void showError(int k){
     printf("Error. Puntero erróneo en shift");
   else if (k == 18)
     printf("Error. Puntero erróneo en rev");
-  else if (k == 19)
-    printf("Error. Puntero erróneo en BISQRT");
+  /*else if (k == 19)
+    printf("Error. Puntero erróneo en BISQRT");*/
   else if (k == 20)
     printf("Error. Puntero erróneo en pow");
   else if (k == 21)
@@ -1365,6 +1424,10 @@ static void showError(int k){
     printf("Error. Puntero erróneo en clean");
   else if (k == 24)
     printf("Error. Puntero erróneo en signum");
+  else if (k == 25)
+    printf("Error. Exponente demasiado grande");
+  else if (k == 26)
+    printf("Error. Puntero erróneo en nqrt");
   else if (k == 98)
     printf("Error. Puntero erróneo en validateBI");
   else if (k == 99)
@@ -1440,7 +1503,7 @@ static void pAppend(void *va, void *vb){
 
   //si b = 0, no hacemos nada
   //no usamos equals para no dañar el rendimiento
-  if (b->count == 0 && b->n[0] == 0){ 
+  if (b->count == 0 && b->n[0] == 0) {
     //libreamos memoria
     free(a);
     free(b);
@@ -1465,7 +1528,7 @@ static void pAppend(void *va, void *vb){
 
     --aux->count;
 
-    add(a, aux);
+    pAdd(a, aux);
   }
 
   //ajustamos el resultado
@@ -1512,26 +1575,33 @@ static void clean(void *va){
  * Devuelve la cantidad de datos negativos que hay en la operación.
  */
 //static int signum(struct BigInteger* a, struct BigInteger b){
-static int signum(void* va, void *vb){
-  struct BigInteger* a = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-  struct BigInteger* b = (struct BigInteger*)malloc(sizeof(struct BigInteger));
+//static int signum(void* va, void *vb){
+static int signum(int a, int b){
+  /*struct BigInteger* a = (struct BigInteger*)malloc(sizeof(struct BigInteger));
+  struct BigInteger* b = (struct BigInteger*)malloc(sizeof(struct BigInteger));*/
   int ret = 0;
 
-  if (a == NULL || b == NULL)
-    showError(24);
+  /*if (a == NULL || b == NULL)
+    showError(24);*/
 
-  memcpy(a, va, sizeof(struct BigInteger));
-  memcpy(b, vb, sizeof(struct BigInteger));
+  /*memcpy(a, va, sizeof(struct BigInteger));
+  memcpy(b, vb, sizeof(struct BigInteger));*/
 
-  if(a->n[a->count] < 0)
+  /*if(a->n[a->count] < 0)
     ret = 10;
 
   if(b->n[b->count] < 0)
-    ++ret;
+    ++ret;*/
 
   //limpiamos memoria
-  free(a);
-  free(b);
+  /*free(a);
+  free(b);*/
+  
+  if (a < 0)
+    ret = 10;
+
+  if (b < 0)
+    ++ret;
 
   return ret;
 }
@@ -1565,7 +1635,10 @@ void validateBI(void* a) {
     t++;
   }
 
-  t = temp;
+  t -= MAX_LENGTH;
+  t -= 1;
+  //t = temp;
 
   free(t);
+  //free(temp);
 }
