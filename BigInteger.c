@@ -29,6 +29,8 @@
  *        ==> Aumentado un 53,656% el rendimiento de nqrt a través del uso de wrappers
  *          ==> Se usa nqrt como referencia debido a que nqrt -> pow -> mul -> pmul -> sum
  *            Es el camino que más funciones concatena.
+ *    v1.5
+ *      - Cambio en la función toString para que mueva los datos a un char* en lugar de printarlos
  */
 #include "stdio.h"
 #include "conio.h"
@@ -38,7 +40,7 @@
 #include "BigInteger.h"
 
 int MAX_LENGTH = 4096;
-float BI_VERSION = 1.4f;
+float BI_VERSION = 1.5f;
 
 
 /*
@@ -1446,8 +1448,9 @@ static void showError(int k){
  * Escribe en pantalla el BigInteger
  */
 //void toString(struct BigInteger b){
-void toString(void *vb){
+void toString(void *vb, char* dst){
   struct BigInteger* b = (struct BigInteger*)malloc(sizeof(struct BigInteger));
+  int i = 0;
 
   if (b == NULL)
     showError(21);
@@ -1457,8 +1460,11 @@ void toString(void *vb){
 
   memcpy(b, vb, sizeof(struct BigInteger));
 
-  for(;b->count >= 0;b->count--)
-    printf("%i", b->n[b->count]);
+  for (; b->count >= 0; b->count--)
+    //printf("%i", b->n[b->count]);
+    dst[i++] = (char)(b->n[b->count] + 48);
+
+  dst[i] = '\0';
 
   //libreamos memoria
   free(b);
