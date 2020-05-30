@@ -38,7 +38,7 @@ void BImemcpy(void* dst, int orig);
 void newBI(void *dst, char* s, int sig);
 static void showError(int k);
 //void toString(struct BigInteger b);
-void toString(void *vb);
+void toString(void *vb, char* dst);
 //void append(struct BigInteger *a, struct BigInteger b);
 void append(void *va, void *vb);
 static void pAppend(void *va, void *vb);
