@@ -20,7 +20,7 @@ This architecture was made during my Degree final paper (TFG, in Spain), to cove
  * v1.3 (beta)
    * Patch to avoid memory leackage
    * Deleted "time.h" library (unnecesary)
- * v.4 (bet)
+ * v1.4 (beta)
    * Changed "BIQSRT" function for "nqrt", that makes "n-root"
    * Delete "static" from BIT (unnecesary)
    * Created wrapper function for "add" ,"sub", and "mul" for internal use.
@@ -29,6 +29,18 @@ This architecture was made during my Degree final paper (TFG, in Spain), to cove
      * 90,566% memory usage reduction on nqrt via wrappers.
      * 53,656% performance increase on nqrt via wrappers.
      * (nqrt is used to measurement as nqrt -> pow -> mul -> pmul -> add is the longest function chain available)
+ * v1.5 (beta)
+   * Changes on toString function to move data to char* instead of printing
+ * v1.6 (beta)
+   * Bugfix on validateBI on negative numbers
+   * Bugfix on toString on negative numbers
+ * v2.0 (Release)
+   * SIT (324 diferent operations) done. Fixes done
+     * Remove validateBI from pSub
+     * Bugfix on add if b < 0 and |a| < |b|
+     * Bugfix on add if |a| < |b| and a, b < 0
+     * Bugfix on division if a / b, b < 0
+   * Code cleansing
 
 
 ## How To Configure it?
