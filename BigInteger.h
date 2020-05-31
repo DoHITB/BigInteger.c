@@ -11,7 +11,7 @@
 //struct
 struct BigInteger{
   int count;
-  int n[512];
+  int n[4096];
 };
 
 //BIT, Buffer para multiplicación y división
@@ -23,50 +23,58 @@ struct BIT{
 /*
  * Variables útiles
  */
-struct BigInteger _ZERO;
-struct BigInteger _ONE;
-struct BigInteger _TEN;
-struct BigInteger _HUND;
-struct BigInteger _MIN;
+static struct BigInteger _ZERO;
+static struct BigInteger _ONE;
+static struct BigInteger _TEN;
+static struct BigInteger _HUND;
+static struct BigInteger _MIN;
+
+static int ini = 0;
 
 
 //Generales
-void _BI_initialize();
-struct BigInteger newBI(char* s);
-void showError(int k);
-void toString(struct BigInteger b);
-void append(struct BigInteger *a, struct BigInteger b);
-void pAppend(struct BigInteger *a, struct BigInteger *b);
-void clean(struct BigInteger *a);
-int signum(struct BigInteger *a, struct BigInteger b);
+static void _BI_initialize();
+void BImemcpy(void* dst, int orig);
+void newBI(void *dst, char* s, int sig);
+static void showError(int k);
+void toString(void *vb, char* dst);
+void append(void *va, void *vb);
+static void pAppend(void *va, void *vb);
+static void clean(void *va);
+static int signum(int a, int b);
+void validateBI(void* a);
 
 //Suma
-void add(struct BigInteger *a, struct BigInteger b);
-void addition(struct BigInteger *a, struct BigInteger b);
-void carryAdd(struct BigInteger *a);
+void add(void* va, void* vb);
+static void pAdd(void* va, void* vb);
+static void addition(void* va, void* vb);
+static void carryAdd(void* va);
 
 //Resta
-void sub(struct BigInteger *a, struct BigInteger b);
-void subtract(struct BigInteger *a, struct BigInteger *b, struct BigInteger *ret);
-void carrySub(struct BigInteger *a, int carryType);
-void recount(struct BigInteger *a);
-void hardEquals(struct BigInteger a, struct BigInteger b, int *ret);
+void sub(void* va, void* vb);
+static void pSub(void* va, void* vb);
+static void subtract(void *va, void *vb, void *vret);
+static void carrySub(void* va, int carryType);
+static void recount(void *va);
+static void hardEquals(void *va, void *vb, int *ret);
+void equals(void* va, void* vb, int* ret);
 
 //Multiplicación
-void mul(struct BigInteger *a, struct BigInteger b);
-void pMul(/*struct BigInteger *a, int x, */int pos, struct BigInteger *part);
+void mul(void *va, void *vb);
+static void sMul(void* va, void* vb);
+static void pMul(int pos, void *vpart);
 
 //División
-void dvs(struct BigInteger *a, struct BigInteger b);
-void divide(struct BigInteger *a, struct BigInteger b);
-void makeBase(struct BigInteger *base, struct BigInteger b, int length, int* start);
-void shift(struct BigInteger* base, int start);
-void rev(struct BigInteger *a);
+void dvs(void *va, void *vb);
+static void divide(void *va, void *vb);
+static void makeBase(void *vbase, void *vb, int length, int* start);
+static void shift(void* vbase, int start);
+static void rev(void *va);
 
 //Raíz Cuadrada
-struct BigInteger BISQRT(struct BigInteger a);
+void nqrt(void* va, int n);
 
 //Potencia
-void pow(struct BigInteger *a, int p);
+void pow(void *va, int p);
 
 #endif /* BIGINTEGER_H_ */

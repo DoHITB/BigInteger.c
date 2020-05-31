@@ -1,9 +1,46 @@
-# BigInteger.c
+# /voidMemory/BigInteger.c
 C Based model to work with Big Integers
 
-Correctly tested working with up to 4096 digits integer.
+Correctly tested working with up to 4096 digits integer (on the master branch).
 
 This architecture was made during my Degree final paper (TFG, in Spain), to cover an RSA cryptoanalsys.
+
+
+## Changelog
+ * v1.1 (beta)
+   * Review variables and functions, making it "static" when convenient.
+   * Changing all pointer references to "void" to avoid memory leakage.
+   * Added new validations on BI creation.
+   * New function "BImemcpy" to retreive useful values of BigInteger.
+   * New function "validateBI" to validate the internal structure of a BI void pointer.
+ * v1.11 (beta)
+   * Added memory cleansing before "return" statements
+ * v1.2 (beta)
+   * Added new behaviour for better performance on "pow" function
+ * v1.3 (beta)
+   * Patch to avoid memory leackage
+   * Deleted "time.h" library (unnecesary)
+ * v1.4 (beta)
+   * Changed "BIQSRT" function for "nqrt", that makes "n-root"
+   * Delete "static" from BIT (unnecesary)
+   * Created wrapper function for "add" ,"sub", and "mul" for internal use.
+   * Arranged header variable names to naming convention
+   * Function "signum" modified to increase performance. It now works with two int.
+     * 90,566% memory usage reduction on nqrt via wrappers.
+     * 53,656% performance increase on nqrt via wrappers.
+     * (nqrt is used to measurement as nqrt -> pow -> mul -> pmul -> add is the longest function chain available)
+ * v1.5 (beta)
+   * Changes on toString function to move data to char* instead of printing
+ * v1.6 (beta)
+   * Bugfix on validateBI on negative numbers
+   * Bugfix on toString on negative numbers
+ * v2.0 (Release)
+   * SIT (324 diferent operations) done. Fixes done
+     * Remove validateBI from pSub
+     * Bugfix on add if b < 0 and |a| < |b|
+     * Bugfix on add if |a| < |b| and a, b < 0
+     * Bugfix on division if a / b, b < 0
+   * Code cleansing
 
 
 ## How To Configure it?
@@ -27,25 +64,23 @@ This architecture was made during my Degree final paper (TFG, in Spain), to cove
   * Multiplication (mul function)
   * Division (dvs function)
 * BI also provides two advanced operations
-  * Square root (BISQRT function)
+  * n-root (nqrt function)
   * Powering (pow function)
 * Debugging and others
   * Display function (toString function)
-  * Useful variables
+  * Useful variables (via BImemcpy function)
     * Minus One (_MIN)
     * Zero (_ZERO)
     * One (_ONE)
     * Ten (_TEN)
     * One Hundred (_HUN)
-  * Appending function (append and pAppend functions)
-  * Compare function (hardEquals function)
-  * Initialize and create BigInteger (newBI and clean functions)
+  * Appending function (append function)
+  * Compare function (equals function)
+  * Initialize and create BigInteger (newBI function)
   
   
 ## Disclamer
-Use only the above mentioned functions in order to perform operations, as other functions such as "addition", or "subtract" are meant for internal use of BI.
-
-Using any of the non-listed functions is discouraged, and does not assure a correct result.
+This version is on beta and has not been tested yet. Use at your own risk
 
 
 ## Want to know more?
