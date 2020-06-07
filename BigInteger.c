@@ -43,6 +43,8 @@
  *        * Bugfix en suma si |a| < |b| y a, b < 0
  *        * Buffix en división si a / b, b < 0
  *      - Limpieza de código
+ *    v2.1
+ *      - Bugfix en funcion "division"
  */
 #include "stdio.h"
 #include "stdlib.h"
@@ -50,7 +52,7 @@
 #include "BigInteger.h"
 
 int MAX_LENGTH = 4096;
-float BI_VERSION = 2.0f;
+float BI_VERSION = 2.1f;
 
 /*
  * Función initialize
@@ -927,6 +929,10 @@ static void divide(void *va, void *vb){
 
   currentBIT = 1;
 
+  //iniciamos dTemp y temp
+  BImemcpy(dTemp, 0);
+  BImemcpy(temp, 0);
+  
   /*
    * Nos quedamos con los "b.count" primeros dígitos. Si "b" tiene un único
    * dígito, no movemos nada, porque ya moveremos el siguiente dígito más adelante
@@ -1039,7 +1045,11 @@ static void divide(void *va, void *vb){
   memcpy(a, ret, sizeof(struct BigInteger));
 
   recount(a);
-
+  
+  //evitar error de falso desbordamiento
+  if (a->n[a->count + 1] > 0)
+    ++a->count;
+  
   //ajustamos valores
   memcpy(va, a, sizeof(struct BigInteger));
 
