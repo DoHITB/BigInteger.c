@@ -43,6 +43,8 @@ This architecture was made during my Degree final paper (TFG, in Spain), to cove
    * Code cleansing
  * v2.1 (Release)
    * Bugfix on "division" function
+ * v2.2 (Release)
+   * Bugfix on "validateBI" function. Avoid "t" data leackage. Now BI works on 2MB memory.
 
 
 ## How To Configure it?
