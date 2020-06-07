@@ -41,6 +41,8 @@ This architecture was made during my Degree final paper (TFG, in Spain), to cove
      * Bugfix on add if |a| < |b| and a, b < 0
      * Bugfix on division if a / b, b < 0
    * Code cleansing
+ * v2.1 (Release)
+   * Bugfix on "division" function
 
 
 ## How To Configure it?
