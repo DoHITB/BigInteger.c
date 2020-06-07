@@ -45,6 +45,8 @@
  *      - Limpieza de código
  *    v2.1
  *      - Bugfix en funcion "division"
+ *    v2.2
+ *      - Optimización de memoria: arreglada fuga de memoria en validateBI
  */
 #include "stdio.h"
 #include "stdlib.h"
@@ -52,7 +54,7 @@
 #include "BigInteger.h"
 
 int MAX_LENGTH = 4096;
-float BI_VERSION = 2.1f;
+float BI_VERSION = 2.2f;
 
 /*
  * Función initialize
@@ -1542,33 +1544,29 @@ static int signum(int a, int b){
  * Valida que todos los datos del BI sean coherentes
  */
 void validateBI(void* a) {
-  struct BigInteger* temp = (struct BigInteger*)malloc(sizeof(struct BigInteger));
   int* t = (int*)(malloc(sizeof(int)));
   int i = 0;
 
   memcpy(temp, a, sizeof(struct BigInteger));
 
-  if (t == NULL || a == NULL || temp == NULL)
+  if (t == NULL || a == NULL)
     showError(98);
 
-  t = temp;
+  memcpy(t, (int*)a, sizeof(int));
 
   //validamos la variable de longitud
   if (*t < 0 || *t > MAX_LENGTH)
     showError(99);
 
-  t++;
+  memcpy(t, (int*)a + 1, sizeof(int));
 
   //validamos el resto de dígitos, que pueden ser positivos o negativos
   for (; i < MAX_LENGTH; i++) {
     if (*t < -9 || *t > 9)
       showError(99);
 
-    t++;
+    memcpy(t, (int*)a + (i + 1), sizeof(int));
   }
-
-  t -= MAX_LENGTH;
-  t -= 1;
 
   free(t);
 }
