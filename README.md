@@ -44,7 +44,9 @@ This architecture was made during my Degree final paper (TFG, in Spain), to cove
  * v2.1 (Release)
    * Bugfix on "division" function
  * v2.2 (Release)
-   * Bugfix on "validateBI" function. Avoid "t" data leackage. Now BI works on 2MB memory.
+   * Bugfix on "validateBI" function. Avoid "t" data leackage.
+ * v2.3 (Release)
+   * Naming change on "pow" function. Now it's called "bipow" to avoid internal errors.
 
 
 ## How To Configure it?
@@ -69,7 +71,7 @@ This architecture was made during my Degree final paper (TFG, in Spain), to cove
   * Division (dvs function)
 * BI also provides two advanced operations
   * n-root (nqrt function)
-  * Powering (pow function)
+  * Powering (bipow function)
 * Debugging and others
   * Display function (toString function)
   * Useful variables (via BImemcpy function)
