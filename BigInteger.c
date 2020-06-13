@@ -49,6 +49,8 @@
  *      - Optimización de memoria: arreglada fuga de memoria en validateBI
  *    v2.3
  *      - Renombrada función "pow" por "bipow" para evitar conflictos internos.
+ *    v2.4
+ *      - Solucionar error con división cuando len(a) - len(b) = 1
  */
 #include "stdio.h"
 #include "stdlib.h"
@@ -56,7 +58,7 @@
 #include "BigInteger.h"
 
 int MAX_LENGTH = 4096;
-float BI_VERSION = 2.3f;
+float BI_VERSION = 2.4f;
 
 /*
  * Función initialize
@@ -950,8 +952,10 @@ static void divide(void *va, void *vb){
 
   dTemp->count = b->count - 1;
 
+  /*2.3
   if (dTemp->count == 0)
     --dTemp->count;
+  */
 
   //si "b" tiene una cifra, b.len será 0 pero tenemos que restar una cifra igualmente
   if (b->count == 0)
