@@ -75,6 +75,6 @@ static void rev(void *va);
 void nqrt(void* va, int n);
 
 //Potencia
-void pow(void *va, int p);
+void bipow(void *va, int p);
 
 #endif /* BIGINTEGER_H_ */
