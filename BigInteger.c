@@ -47,6 +47,8 @@
  *      - Bugfix en funcion "division"
  *    v2.2
  *      - Optimización de memoria: arreglada fuga de memoria en validateBI
+ *    v2.3
+ *      - Renombrada función "pow" por "bipow" para evitar conflictos internos.
  */
 #include "stdio.h"
 #include "stdlib.h"
@@ -54,7 +56,7 @@
 #include "BigInteger.h"
 
 int MAX_LENGTH = 4096;
-float BI_VERSION = 2.2f;
+float BI_VERSION = 2.3f;
 
 /*
  * Función initialize
@@ -1197,7 +1199,7 @@ void nqrt(void* va, int n) {
   do {
     pAdd(ret, one);
     memcpy(i, ret, sizeof(struct BigInteger));
-    pow(i, n);
+    bipow(i, n);
     hardEquals(i, a, &stop);
   } while (stop == 2);
 
@@ -1215,11 +1217,11 @@ void nqrt(void* va, int n) {
 }
 
 /*
- * Función pow.
+ * Función bipow.
  *
  * Simula la operación a = a^p
  */
-void pow(void *va, int p) {
+void bipow(void *va, int p) {
   struct BigInteger *a = (struct BigInteger*)malloc(sizeof(struct BigInteger));
   int z = 1;
   struct BigInteger* res = (struct BigInteger*)malloc(sizeof(struct BigInteger));
