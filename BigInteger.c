@@ -51,6 +51,8 @@
  *      - Renombrada función "pow" por "bipow" para evitar conflictos internos.
  *    v2.4
  *      - Solucionar error con división cuando len(a) - len(b) = 1
+ *    v2.5
+ *      - Cambio en nqrt para mejora de rendimiento. Cálculo de raíz por Bolzano
  */
 #include "stdio.h"
 #include "stdlib.h"
@@ -58,7 +60,7 @@
 #include "BigInteger.h"
 
 int MAX_LENGTH = 4096;
-float BI_VERSION = 2.4f;
+float BI_VERSION = 2.5f;
 
 /*
  * Función initialize
@@ -1174,50 +1176,76 @@ static void rev(void* va) {
 void nqrt(void* va, int n) {
   struct BigInteger* a = (struct BigInteger*)malloc(sizeof(struct BigInteger));
   struct BigInteger* ret = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-  struct BigInteger* i = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-  struct BigInteger* one = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-  int stop = 0;
+  struct BigInteger* raw = (struct BigInteger*)malloc(sizeof(struct BigInteger));
+  struct BigInteger* base = (struct BigInteger*)malloc(sizeof(struct BigInteger));
+  struct BigInteger* zero = (struct BigInteger*)malloc(sizeof(struct BigInteger));
+  int lmax = 0;
+  int isEq = 0;
 
-  if (a == NULL || ret == NULL || i == NULL || one == NULL)
+  if (a == NULL)
     showError(26);
 
   //validamos punteros
   validateBI(va);
+  BImemcpy(base, 0);
+  BImemcpy(zero, 0);
 
   memcpy(a, va, sizeof(struct BigInteger));
-  BImemcpy(ret, 0);
-  BImemcpy(i, 0);
-  BImemcpy(one, 1);
 
-  hardEquals(a, ret, &stop);
+  lmax = a->count / 2;
 
-  if (stop == 0) {
-    free(a);
-    free(i);
-    free(one);
-    free(ret);
+  //creamos una base
+  base->n[lmax] = 1;
+  base->count = lmax;
 
-    return;
+  //usamos Bolzano para obtener una aproximación
+  memcpy(ret, base, sizeof(struct BigInteger));
+  memcpy(raw, base, sizeof(struct BigInteger));
+
+  //calculamos la potencia
+  bipow(ret, n);
+  equals(ret, a, &isEq);
+
+  while (isEq != 0) {
+    while (isEq == 2) {
+      //ret < a. Incrementamos y probamos de nuevo hasta el exceso
+      add(raw, base);
+
+      memcpy(ret, raw, sizeof(struct BigInteger));
+
+      bipow(ret, n);
+      equals(ret, a, &isEq);
+    }
+
+    //una vez aquí, siempre se dará ret >= a
+    if (isEq == 1) {
+      //si a > ret, retrocedemos 1 posición base y vamos a ajustar la posición anterior
+      sub(raw, base);
+
+      base->n[lmax] = 0;
+      --lmax;
+      base->n[lmax] = 1;
+      --base->count;
+
+      //calculamos la potencia y comparamos (siempre será a < ret, ya que si fuera a = ret no hubiera entrado).
+      equals(base, zero, &isEq);
+
+      //si base > 0, aún hay que iterar
+      if (isEq == 1)
+        isEq = 2;
+      else
+        //en caso contrario, hemos llegado a la máxima aproximación posible
+        isEq = 0;
+    }
   }
 
-  do {
-    pAdd(ret, one);
-    memcpy(i, ret, sizeof(struct BigInteger));
-    bipow(i, n);
-    hardEquals(i, a, &stop);
-  } while (stop == 2);
+  memcpy(va, raw, sizeof(struct BigInteger));
 
-  if (stop > 0)
-    pSub(ret, one);
-
-  //ajustamos resultado
-  memcpy(va, ret, sizeof(struct BigInteger));
-
-  //liberamos memoria
   free(a);
   free(ret);
-  free(i);
-  free(one);
+  free(raw);
+  free(base);
+  free(zero);
 }
 
 /*
