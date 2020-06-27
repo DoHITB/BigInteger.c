@@ -47,6 +47,10 @@ This architecture was made during my Degree final paper (TFG, in Spain), to cove
    * Bugfix on "validateBI" function. Avoid "t" data leackage.
  * v2.3 (Release)
    * Naming change on "pow" function. Now it's called "bipow" to avoid internal errors.
+ * v2.4 (Release)
+   * Bugfix on division when len(a) - len(b) = 1
+ * v2.5 (Release)
+   * Change on "nqrt" function for performance improvement. Root calculation via Bolzano
 
 
 ## How To Configure it?
