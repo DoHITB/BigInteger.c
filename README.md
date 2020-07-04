@@ -51,6 +51,8 @@ This architecture was made during my Degree final paper (TFG, in Spain), to cove
    * Bugfix on division when len(a) - len(b) = 1
  * v2.5 (Release)
    * Change on "nqrt" function for performance improvement. Root calculation via Bolzano
+ * v2.51 (Release)
+   * Bugfix on "validateBI"
 
 
 ## How To Configure it?
