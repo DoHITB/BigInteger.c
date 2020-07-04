@@ -53,6 +53,8 @@
  *      - Solucionar error con división cuando len(a) - len(b) = 1
  *    v2.5
  *      - Cambio en nqrt para mejora de rendimiento. Cálculo de raíz por Bolzano
+ *    v2.51
+ *      - Bugfix en validateBI
  */
 #include "stdio.h"
 #include "stdlib.h"
@@ -60,7 +62,7 @@
 #include "BigInteger.h"
 
 int MAX_LENGTH = 4096;
-float BI_VERSION = 2.5f;
+float BI_VERSION = 2.51f;
 
 /*
  * Función initialize
@@ -1580,8 +1582,6 @@ static int signum(int a, int b){
 void validateBI(void* a) {
   int* t = (int*)(malloc(sizeof(int)));
   int i = 0;
-
-  memcpy(temp, a, sizeof(struct BigInteger));
 
   if (t == NULL || a == NULL)
     showError(98);
