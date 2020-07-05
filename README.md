@@ -89,10 +89,6 @@ This architecture was made during my Degree final paper (TFG, in Spain), to cove
   * Appending function (append function)
   * Compare function (equals function)
   * Initialize and create BigInteger (newBI function)
-  
-  
-## Disclamer
-This version is on beta and has not been tested yet. Use at your own risk
 
 
 ## Want to know more?
