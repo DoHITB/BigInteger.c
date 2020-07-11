@@ -53,6 +53,19 @@ This architecture was made during my Degree final paper (TFG, in Spain), to cove
    * Change on "nqrt" function for performance improvement. Root calculation via Bolzano
  * v2.51 (Release)
    * Bugfix on "validateBI"
+ * v3.0 (Major Release)
+   * Deleted unnecesary commented lines
+   * Changed the signature of "subtraction" for "subtract(a, b)"
+   * Deleted function "rev" (unnecesary)
+   * Deleted "min" variable from multiplication
+   * Deleted "a = -1" and "b = -1" validation on multiplication (unnecesary)
+   * Added length on "pMul" function to avoid heap overflow
+   * Change on "sMul" function. Instead of doing all the products and then all the add, now it make product-addition loop. This way, there are less memory consumption and better performance.
+   * Change on "carryAdd" function. Deleted "Do/While" loop (unncesary)
+   * Deleted function "makeBase" (unnecesary)
+   * Deleted function "shift" (unnecesary)
+   * New function iniStr. It allocate memory for "toString" function
+   * General code cleansing
 
 
 ## How To Configure it?
@@ -79,6 +92,7 @@ This architecture was made during my Degree final paper (TFG, in Spain), to cove
   * n-root (nqrt function)
   * Powering (bipow function)
 * Debugging and others
+  * Memory allocaion for display (iniStr function)
   * Display function (toString function)
   * Useful variables (via BImemcpy function)
     * Minus One (_MIN)
