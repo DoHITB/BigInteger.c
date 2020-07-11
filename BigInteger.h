@@ -2,7 +2,7 @@
  * BigInteger.h
  *
  *  Created on: 25 ene. 2019
- *      Author: DoHITB
+ *      Author: DoHITB under MIT License
  */
 
 #ifndef BIGINTEGER_H_
@@ -43,6 +43,7 @@ static void pAppend(void *va, void *vb);
 static void clean(void *va);
 static int signum(int a, int b);
 void validateBI(void* a);
+void iniStr(char** dst);
 
 //Suma
 void add(void* va, void* vb);
@@ -53,7 +54,7 @@ static void carryAdd(void* va);
 //Resta
 void sub(void* va, void* vb);
 static void pSub(void* va, void* vb);
-static void subtract(void *va, void *vb, void *vret);
+static void subtract(void *va, void *vb);
 static void carrySub(void* va, int carryType);
 static void recount(void *va);
 static void hardEquals(void *va, void *vb, int *ret);
@@ -67,9 +68,6 @@ static void pMul(int pos, void *vpart);
 //División
 void dvs(void *va, void *vb);
 static void divide(void *va, void *vb);
-static void makeBase(void *vbase, void *vb, int length, int* start);
-static void shift(void* vbase, int start);
-static void rev(void *va);
 
 //Raíz Cuadrada
 void nqrt(void* va, int n);
