@@ -66,6 +66,8 @@ This architecture was made during my Degree final paper (TFG, in Spain), to cove
    * Deleted function "shift" (unnecesary)
    * New function iniStr. It allocate memory for "toString" function
    * General code cleansing
+ * v3.01 (Release)
+   * Deleted "Do/While" loop on "carrySub" function.
 
 
 ## How To Configure it?
