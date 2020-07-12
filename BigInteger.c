@@ -73,6 +73,8 @@
  *        * Eliminar función shift. Innecesaria
  *        * Nueva función iniStr. Reserva memoria para usar en toString
  *        * Limpieza de código
+ *    v3.01
+ *      - Modificado "carrySub" para eliminar bucle "Do/While".
  */
 #include "stdio.h"
 #include "stdlib.h"
@@ -81,7 +83,7 @@
 #include "BigInteger.h"
 
 int MAX_LENGTH = 4096;
-float BI_VERSION = 3.0f;
+float BI_VERSION = 3.01f;
 
 /*
  * Función initialize
@@ -456,10 +458,8 @@ static void subtract(void *va, void *vb){
  * se gestiona como a = 10 + a; sino, se invierte el signo (excepto al último dígito)
  */
 static void carrySub(void *va, int carryType){
-  int i;
-  int m = 0;
-  int acc;
-  int ret;
+  int i = 0;
+  int acc = 0;
   struct BigInteger* a = (struct BigInteger*)malloc(sizeof(struct BigInteger));
 
   if (a == NULL)
@@ -467,39 +467,28 @@ static void carrySub(void *va, int carryType){
 
   memcpy(a, va, sizeof(struct BigInteger));
 
-  do{
-    ret = 0;
-    acc = 0;
+  if(carryType == 0){
+    for(;i <= a->count; i++){
+      //restamos el acarreo al número
+      a->n[i] -= acc;
 
-    if(carryType == 0){
-      for(i = m;i <= a->count; i++){
-        //restamos el acarreo al número
-        a->n[i] -= acc;
-
-        if(a->n[i] < 0){
-          //normalizamos el número
-          a->n[i] += 10;
-          acc = 1;
-
-          //si es el primer dígito del que hacemos acarreo, lo guardamos
-          if (ret == 0)
-            m = i + 1;
-
-          ret = 1;
-        }else
-          acc = 0;
-      }
-    }else{
-      //en esta opción, no es necesario pasar una segunda vez por acarreos.
-      for(i = 0;i < a->count;i++)
-        if(a->n[i] < 0)
-          //normalizamos el número
-          a->n[i] = a->n[i] * -1;
+      if(a->n[i] < 0){
+        //normalizamos el número
+        a->n[i] += 10;
+        acc = 1;
+      }else
+        acc = 0;
     }
+  }else{
+    //en esta opción, no es necesario pasar una segunda vez por acarreos.
+    for(i = 0;i < a->count;i++)
+      if(a->n[i] < 0)
+        //normalizamos el número
+        a->n[i] = a->n[i] * -1;
+  }
 
-    //contamos de nuevo los dígitos
-    recount(a);
-  }while(ret > 0);
+  //contamos de nuevo los dígitos
+  recount(a);
 
   //ajustamos el resultado
   memcpy(va, a, sizeof(struct BigInteger));
