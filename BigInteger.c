@@ -75,6 +75,11 @@
  *        * Limpieza de código
  *    v3.01
  *      - Modificado "carrySub" para eliminar bucle "Do/While".
+ *    v3.02
+ *      - Modificado "carryAdd". El acarreo se hace en dos partes.
+ *        * Parte común: se evalúa todo el acarreo
+ *        * Parte no común: se evalúa hasta que no hay acarreo.
+ *        * Incremento del 3.448% de rendimiento con 10.000 sumas de 100 dígitos
  */
 #include "stdio.h"
 #include "stdlib.h"
@@ -83,7 +88,7 @@
 #include "BigInteger.h"
 
 int MAX_LENGTH = 4096;
-float BI_VERSION = 3.01f;
+float BI_VERSION = 3.02f;
 
 /*
  * Función initialize
@@ -280,7 +285,12 @@ static void addition(void* va, void* vb) {
   }
 
   //gestionamos el acarreo
-  carryAdd(a);
+  /*
+   * Si a->count = b->count --> min = a->count (Se tratarán todos los dígitos)
+   * Si a->count > b->count --> min = b->count (Se hará la gestión en dos partes)
+   * Si a->count < b->count --> min = a->count (Se hará la gestión en dos partes)
+   */
+  carryAdd(a, 1, min);
 
   //ajustamos resultado
   memcpy(va, a, sizeof(struct BigInteger));
@@ -296,9 +306,10 @@ static void addition(void* va, void* vb) {
  * Gestiona el acarreo de la suma. Si hay movimiento de datos, se mueve el valor 1 a ret.
  * De esta manera, podemos llamar hasta que no haya cambios en el acarreo.
  */
-static void carryAdd(void* va) {
+static void carryAdd(void* va, int move, int min) {
   int i = 0;
   int acc;
+  int limit;
   struct BigInteger* a = (struct BigInteger*)malloc(sizeof(struct BigInteger));
 
   if (a == NULL)
@@ -308,17 +319,39 @@ static void carryAdd(void* va) {
 
   acc = 0;
 
-  //recorremos a y vamos sumando el acarreo
-  for(;i <= a->count; i++){
+  //move == 1 --> sabemos que hay una parte no común. En min está el límite de la parte común
+  if (move == 1)
+    limit = min;
+  else
+    limit = a->count;
+
+  //recorremos a y vamos sumando el acarreo de la parte común
+  //for (; i <= a->count; i++) {
+  for (; i <= limit; i++){
     //sumamos acarreo
     a->n[i] += acc;
 
     //como acc es int, podemos dividir entre 10 y sacar el acarreo
     acc = a->n[i] / 10;
-
-    if (acc > 0) 
+    
+    if (acc > 0)
       //normalizamos el número
       a->n[i] = a->n[i] % 10;
+  }
+
+  if (move == 1) {
+    //queda parte no común. Acarreamos hatsa que acc sea 0, ya que la parte no común ya está normalizada
+    while (acc > 0) {
+      //sumamos acarreo
+      a->n[i] += acc;
+
+      //como acc es int, podemos dividir entre 10 y sacar el acarreo
+      acc = a->n[i] / 10;
+
+      if (acc > 0)
+        //normalizamos el número
+        a->n[i] = a->n[i] % 10;
+    }
   }
 
   //si ha quedado acarreo, lo guardamos al final;
@@ -703,7 +736,7 @@ static void sMul(void* va, void* vb) {
           part->n[x] = a->n[x] * b->n[i];
 
         part->count = x - 1;
-        carryAdd(part);
+        carryAdd(part, 0, 0);
 
         //movemos el valor a BIT
         memcpy(&table->BI[b->n[i]], part, sizeof(struct BigInteger));
