@@ -1,4 +1,4 @@
-# /voidMemory/BigInteger.c
+# BigInteger.c
 C Based model to work with Big Integers
 
 Correctly tested working with up to 4096 digits integer (on the master branch).
@@ -68,6 +68,11 @@ This architecture was made during my Degree final paper (TFG, in Spain), to cove
    * General code cleansing
  * v3.01 (Release)
    * Deleted "Do/While" loop on "carrySub" function.
+ * v3.02 (Release)
+   * Optimization on "carryAdd" function. Carry is made in two times.
+     * Common part: it's all carried
+     * Non-common part: it's carried unti acc = 0
+     * 3.448% performance increase tested with 10.000 additions of 100 digit numbers
 
 
 ## How To Configure it?
