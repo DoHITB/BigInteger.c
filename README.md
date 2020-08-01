@@ -73,6 +73,15 @@ This architecture was made during my Degree final paper (TFG, in Spain), to cove
      * Common part: it's all carried
      * Non-common part: it's carried unti acc = 0
      * 3.448% performance increase tested with 10.000 additions of 100 digit numbers
+ * v3.1 (Release)
+   * Function "nqrt" modified
+     * Change on "add" calls by "pAdd"
+     * Change on "equals" calls by "hardEquals"
+     * Change on "sub" calls by "pSub"
+     * Change on "bipow" calls by "sBipow"
+     * Performance increase of 38'758% based on 10.000 nqrt calls
+   * New function "sBipow", static wrapper for "bipow"
+   * Bugfix on "carryAdd"
 
 
 ## How To Configure it?
