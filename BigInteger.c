@@ -80,6 +80,15 @@
  *        * Parte común: se evalúa todo el acarreo
  *        * Parte no común: se evalúa hasta que no hay acarreo.
  *        * Incremento del 3.448% de rendimiento con 10.000 sumas de 100 dígitos
+ *    v3.1
+ *    - Modificado "nqrt"
+ *      * cambio en las llamadas de "add" por "pAdd"
+ *      * cambio en las llamadas de "equals" por "hardEquals"
+ *      * cambio en las llamadas de "sub" por "pSub"
+ *      * cambio en las llamadas de "bipow" por "sBipow"
+ *      * incremento del rendimiento de 38'758% basado en 10.000 raices de índice 10
+ *    - Nueva función "sBiPow", wrapper de "bipow" sin validación de BigInteger
+ *    - Bugfix en "carryAdd"
  */
 #include "stdio.h"
 #include "stdlib.h"
@@ -88,7 +97,7 @@
 #include "BigInteger.h"
 
 int MAX_LENGTH = 4096;
-float BI_VERSION = 3.02f;
+float BI_VERSION = 3.1f;
 
 /*
  * Función initialize
@@ -326,7 +335,6 @@ static void carryAdd(void* va, int move, int min) {
     limit = a->count;
 
   //recorremos a y vamos sumando el acarreo de la parte común
-  //for (; i <= a->count; i++) {
   for (; i <= limit; i++){
     //sumamos acarreo
     a->n[i] += acc;
@@ -341,7 +349,7 @@ static void carryAdd(void* va, int move, int min) {
 
   if (move == 1) {
     //queda parte no común. Acarreamos hatsa que acc sea 0, ya que la parte no común ya está normalizada
-    while (acc > 0) {
+    while (acc > 0 && i <= a->count) {
       //sumamos acarreo
       a->n[i] += acc;
 
@@ -351,6 +359,8 @@ static void carryAdd(void* va, int move, int min) {
       if (acc > 0)
         //normalizamos el número
         a->n[i] = a->n[i] % 10;
+
+    i++;
     }
   }
 
@@ -1051,7 +1061,6 @@ static void divide(void *va, void *vb){
 
   ret->count = mLen;
 
-  //*a = ret;
   memcpy(a, ret, sizeof(struct BigInteger));
 
   recount(a);
@@ -1108,24 +1117,24 @@ void nqrt(void* va, int n) {
   memcpy(raw, base, sizeof(struct BigInteger));
 
   //calculamos la potencia
-  bipow(ret, n);
-  equals(ret, a, &isEq);
+  sBipow(ret, n);
+  hardEquals(ret, a, &isEq);
 
   while (isEq != 0) {
     while (isEq == 2) {
       //ret < a. Incrementamos y probamos de nuevo hasta el exceso
-      add(raw, base);
+      pAdd(raw, base);
 
       memcpy(ret, raw, sizeof(struct BigInteger));
 
-      bipow(ret, n);
-      equals(ret, a, &isEq);
+      sBipow(ret, n);
+      hardEquals(ret, a, &isEq);
     }
 
     //una vez aquí, siempre se dará ret >= a
     if (isEq == 1) {
       //si a > ret, retrocedemos 1 posición base y vamos a ajustar la posición anterior
-      sub(raw, base);
+      pSub(raw, base);
 
       base->n[lmax] = 0;
       --lmax;
@@ -1133,7 +1142,7 @@ void nqrt(void* va, int n) {
       --base->count;
 
       //calculamos la potencia y comparamos (siempre será a < ret, ya que si fuera a = ret no hubiera entrado).
-      equals(base, zero, &isEq);
+      hardEquals(base, zero, &isEq);
 
       //si base > 0, aún hay que iterar
       if (isEq == 1)
@@ -1160,16 +1169,8 @@ void nqrt(void* va, int n) {
  */
 void bipow(void *va, int p) {
   struct BigInteger *a = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-  int z = 1;
-  struct BigInteger* res = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-  int d2b[10];
-  int d2bi = 0;
-  int x = 0;
-  int t = p;
-  int i = 0;
-  struct BigInteger* tmp = (struct BigInteger*)malloc(sizeof(struct BigInteger));
 
-  if (a == NULL || res == NULL)
+  if (a == NULL)
     showError(20);
 
   //validamos puntero
@@ -1184,63 +1185,10 @@ void bipow(void *va, int p) {
     //n^1 = n
     //limpiamos memoria
     free(a);
-    free(res);
-    free(tmp);
 
     return;
   }else {
-    BImemcpy(res, 1);
-
-    /*
-     * 1.2: Factorizamos la potencia en base 2 para poder
-     *      mejorar el rendimiento de la operación
-     *
-     *      Como funciona
-     *       - Convertimos el exponente en base 2, y almacenamos
-     *         los datos en un array.
-     *
-     *       - Por cada iteración, vamos calculando a^2^i, es decir
-     *         a^0, a^2, a^4, a^8, a^16, ...
-     *
-     *       - Si la posición de d2b es 1, multiplicamos, y de esta manera
-     *         obtenemos el resultado.
-     *
-     *         Por ejemplo 8^12
-     *           12 = 1100 (aunque se guarda como 0011) ==> 4 + 8
-     *           8^12 = 8^4 * 8^8 = 8^(4+8)
-     *
-     *         De esta manera, hacemos únicamente 8 multiplicaciones en lugar de 12
-     *         (para este ejemplo). En números más grandes la diferencia sería aún mayor
-     */
-    //conversión de decimal a binario
-    while (t > 0 && d2bi < 10) {
-      //dividimos el número por dos
-      x = t / 2;
-
-      //guardamos el resto en d2b
-      d2b[d2bi++] = (t - x * 2);
-
-      //reasignamos el valor
-      t = x;
-    }
-
-    //si el número es muy grande, damos error
-    if (t > 0 && d2bi >= 10)
-      showError(25);
-
-    //iteramos sobre el número binario
-    for (; i < d2bi; i++) {
-      //calculamos (a^(2^i))
-      if (i == 0)
-        memcpy(tmp, a, sizeof(struct BigInteger));
-      else
-        sMul(tmp, tmp);
-
-      if (d2b[i] == 1)
-        sMul(res, tmp);
-    }
-
-    memcpy(a, res, sizeof(struct BigInteger));
+    sBipow(a, p);
   }
 
   //ajustamos resultado
@@ -1248,7 +1196,82 @@ void bipow(void *va, int p) {
 
   //limpiamos memoria
   free(a);
+}
+
+/*
+ * Función bipow.
+ *
+ * Simula la operación a = a^p
+ */
+static void sBipow(void* va, int p) {
+  struct BigInteger* res = (struct BigInteger*)malloc(sizeof(struct BigInteger));
+  struct BigInteger* a = (struct BigInteger*)malloc(sizeof(struct BigInteger));
+  struct BigInteger* tmp = (struct BigInteger*)malloc(sizeof(struct BigInteger));
+  int d2b[10];
+  int d2bi = 0;
+  int x = 0;
+  int t = p;
+  int i = 0;
+
+  if(res == NULL || a == NULL || tmp == NULL)
+    showError(20);
+
+  BImemcpy(res, 1);
+  memcpy(a, va, sizeof(struct BigInteger));
+
+  /*
+   * 1.2: Factorizamos la potencia en base 2 para poder
+   *      mejorar el rendimiento de la operación
+   *
+   *      Como funciona
+   *       - Convertimos el exponente en base 2, y almacenamos
+   *         los datos en un array.
+   *
+   *       - Por cada iteración, vamos calculando a^2^i, es decir
+   *         a^0, a^2, a^4, a^8, a^16, ...
+   *
+   *       - Si la posición de d2b es 1, multiplicamos, y de esta manera
+   *         obtenemos el resultado.
+   *
+   *         Por ejemplo 8^12
+   *           12 = 1100 (aunque se guarda como 0011) ==> 4 + 8
+   *           8^12 = 8^4 * 8^8 = 8^(4+8)
+   *
+   *         De esta manera, hacemos únicamente 8 multiplicaciones en lugar de 12
+   *         (para este ejemplo). En números más grandes la diferencia sería aún mayor
+   */
+   //conversión de decimal a binario
+  while (t > 0 && d2bi < 10) {
+    //dividimos el número por dos
+    x = t / 2;
+
+    //guardamos el resto en d2b
+    d2b[d2bi++] = (t - x * 2);
+
+    //reasignamos el valor
+    t = x;
+  }
+
+  //si el número es muy grande, damos error
+  if (t > 0 && d2bi >= 10)
+    showError(25);
+
+  //iteramos sobre el número binario
+  for (; i < d2bi; i++) {
+    //calculamos (a^(2^i))
+    if (i == 0)
+      memcpy(tmp, a, sizeof(struct BigInteger));
+    else
+      sMul(tmp, tmp);
+
+    if (d2b[i] == 1)
+      sMul(res, tmp);
+  }
+
+  memcpy(va, res, sizeof(struct BigInteger));
+
   free(res);
+  free(a);
   free(tmp);
 }
 
@@ -1307,11 +1330,11 @@ static void showError(int k){
   else if (k == 98)
     printf("Error. Puntero erróneo en validateBI");
   else if (k == 99)
-      printf("Error. Error de validación de datos");
+    printf("Error. Error de validación de datos");
   else
-      printf("Error. Error desconocido");
+    printf("Error. Error desconocido");
 
-    printf("\n");
+  printf("\n");
 
   exit(k * -1);
 }
