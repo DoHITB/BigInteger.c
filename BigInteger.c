@@ -81,14 +81,17 @@
  *        * Parte no común: se evalúa hasta que no hay acarreo.
  *        * Incremento del 3.448% de rendimiento con 10.000 sumas de 100 dígitos
  *    v3.1
- *    - Modificado "nqrt"
- *      * cambio en las llamadas de "add" por "pAdd"
- *      * cambio en las llamadas de "equals" por "hardEquals"
- *      * cambio en las llamadas de "sub" por "pSub"
- *      * cambio en las llamadas de "bipow" por "sBipow"
- *      * incremento del rendimiento de 38'758% basado en 10.000 raices de índice 10
- *    - Nueva función "sBiPow", wrapper de "bipow" sin validación de BigInteger
- *    - Bugfix en "carryAdd"
+ *      - Modificado "nqrt"
+ *        * cambio en las llamadas de "add" por "pAdd"
+ *        * cambio en las llamadas de "equals" por "hardEquals"
+ *        * cambio en las llamadas de "sub" por "pSub"
+ *        * cambio en las llamadas de "bipow" por "sBipow"
+ *        * incremento del rendimiento de 38'758% basado en 10.000 raices de índice 10
+ *      - Nueva función "sBiPow", wrapper de "bipow" sin validación de BigInteger
+ *      - Bugfix en "carryAdd"
+ *    v3.11
+ *      - Eliminada variable "max" en "divide"
+ *      - Eliminada variable "x" en "pAppend"
  */
 #include "stdio.h"
 #include "stdlib.h"
@@ -97,7 +100,7 @@
 #include "BigInteger.h"
 
 int MAX_LENGTH = 4096;
-float BI_VERSION = 3.1f;
+float BI_VERSION = 3.11f;
 
 /*
  * Función initialize
@@ -918,7 +921,6 @@ static void divide(void *va, void *vb){
   int len;
   int i = 0;
   int x = 0;
-  int max;
   int eq;
   int currentBIT;
   int res = 0;
@@ -933,7 +935,6 @@ static void divide(void *va, void *vb){
   BImemcpy(ret, 0);
 
   len = a->count - b->count;
-  max = b->count;
   ret->count = 0;
   dTemp->count = 0;
   
@@ -1409,7 +1410,6 @@ static void pAppend(void *va, void *vb){
   struct BigInteger* b = (struct BigInteger*)malloc(sizeof(struct BigInteger));
   struct BigInteger* aux = (struct BigInteger*)malloc(sizeof(struct BigInteger));
   int i = 0;
-  int x = 0;
 
   if (a == NULL || b == NULL || aux == NULL)
     showError(22);
