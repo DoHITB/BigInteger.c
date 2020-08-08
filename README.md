@@ -82,6 +82,10 @@ This architecture was made during my Degree final paper (TFG, in Spain), to cove
      * Performance increase of 38'758% based on 10.000 nqrt calls
    * New function "sBipow", static wrapper for "bipow"
    * Bugfix on "carryAdd"
+ * v3.11 (Release)
+   * Deleted unused variables
+ * v4.0 (Major Release)
+   * _Coming soon_
 
 
 ## How To Configure it?
