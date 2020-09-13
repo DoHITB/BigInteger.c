@@ -2,7 +2,7 @@
  * BigInteger.h
  *
  *  Created on: 25 ene. 2019
- *      Author: DoHITB under MIT License
+ *    Author: DoHITB under MIT License
  */
 
 #ifndef BIGINTEGER_H_
@@ -44,6 +44,7 @@ static void clean(void *va);
 static int signum(int a, int b);
 void validateBI(void* a);
 void iniStr(char** dst);
+void _free(int n, ...);
 
 //Suma
 void add(void* va, void* vb);
@@ -67,10 +68,12 @@ static void pMul(int pos, void *vpart);
 
 //División
 void dvs(void *va, void *vb);
+static void sDvs(void* va, void* vb);
 static void divide(void *va, void *vb);
 
 //Raíz Cuadrada
 void nqrt(void* va, int n);
+static void sNqrt(void* va, int n);
 
 //Potencia
 void bipow(void *va, int p);
