@@ -2,105 +2,137 @@
  * BigInteger.c
  *
  *  Created on: 18 ene. 2019
- *      Author: DoHITB under MIT License
+ *    Author: DoHITB under MIT License
  *
  *  CHANGELOG
- *    v1.1
- *      - Revisar las funciones y variables, hacer "static" convenientemente.
- *      - Cambiar las referencias de punteros a "void" para evitar consumo de memoria
- *      - Añadidas validaciones en las creaciones de BigInteger
- *      - Nueva función BImemcpy para recuperar valores útiles de BigInteger
- *      - Nueva función validateBI para validar la estructura de un BigInteger pasado como puntero
- *    v1.2
- *      - Añadida mejora de rendimiento para función pow
- *    v1.3
- *      - Parche para evitar acumulación de memoria
- *      - Eliminada librería time.h (inecesaria)
- *    v1.4
- *      - Cambio de función BISQRT por nqrt, que realiza n-ésimas potencias.
- *      - Eliminar "static" de BIT (innecesario)
- *      - Creada función pAdd, wrapper de add sin validación de punteros para uso interno
- *      - Creada función pSub, wrapper de sub sin validación de punteros para uso interno
- *      - Creada función sMul, wrapper de mul sin validación de punteros para uso interno
- *      - Modificados nombres de parámetros en la cabecera para nomenclatura coherente
- *      - Eliminado error 19 (referencia innecesaria a BISQRT)
- *      - Modificada función signum para trabajar con int en lugar de BigInteger.
- *        ==> Reducido un 90,566% el consumo de memoria de nqrt a través del uso de wrappers
- *        ==> Aumentado un 53,656% el rendimiento de nqrt a través del uso de wrappers
- *          ==> Se usa nqrt como referencia debido a que nqrt -> pow -> mul -> pmul -> sum
- *            Es el camino que más funciones concatena.
- *    v1.5
- *      - Cambio de función toString para que mueva los datos a un char* en lugar de printarlos
- *    v1.51
- *      - Eliminar librería conio.h (innecesaria)
- *    v1.6
- *      - Bugfix en validateBI para números negativos
- *      - Bugfix en toString para números negativos
- *    v2.0
- *      - Test Integrado (324 operaciones distintas) finalizado. Cambios realizados
- *        * Quitar validateBI de pSub
- *        * Bugfix en suma si b < 0 y |a| < |b|
- *        * Bugfix en suma si |a| < |b| y a, b < 0
- *        * Buffix en división si a / b, b < 0
- *      - Limpieza de código
- *    v2.1
- *      - Bugfix en funcion "division"
- *    v2.2
- *      - Optimización de memoria: arreglada fuga de memoria en validateBI
- *    v2.3
- *      - Renombrada función "pow" por "bipow" para evitar conflictos internos.
- *    v2.4
- *      - Solucionar error con división cuando len(a) - len(b) = 1
- *    v2.5
- *      - Cambio en nqrt para mejora de rendimiento. Cálculo de raíz por Bolzano
- *    v2.51
- *      - Bugfix en validateBI
- *    v3.0
- *      - Revisión general.
- *        * Eliminadas líneas comentadas innecesarias
- *        * Cambiada la firma de subtraction por subtract(a, b)
- *        * Eliminada la función "rev" (innecesaria)
- *        * Eliminada variable "min" de multiplicación
- *        * Eliminada validación "a = -1" y "b = -1" de multiplicación, ya que nunca se darán
- *        * Añadida validación de longitud en pMul para evitar heap overflow
- *        * Cambio en sMul. En lugar de hacer los productos y sumar, se va realizando el sumatorio
- *          de manera gradual, de esta manera se consume menos memoria y se incrementa el rendimiento
- *          (-26'946% de tiempo empleado en 10.000 multiplicaciones con dos números de 50 cifras)
- *        * Cambio en carryAdd. Se elimina el bucle "Do/While", ya que es innecesario. Con esto
- *          se incrementa el rendimiento (-4'414% de tiempo empleado en 10.000 multiplicaciones con
- *          dos números de 50 cifras)
- *        * Eliminar función makeBase. Innecesaria
- *        * Eliminar función shift. Innecesaria
- *        * Nueva función iniStr. Reserva memoria para usar en toString
- *        * Limpieza de código
- *    v3.01
- *      - Modificado "carrySub" para eliminar bucle "Do/While".
- *    v3.02
- *      - Modificado "carryAdd". El acarreo se hace en dos partes.
- *        * Parte común: se evalúa todo el acarreo
- *        * Parte no común: se evalúa hasta que no hay acarreo.
- *        * Incremento del 3.448% de rendimiento con 10.000 sumas de 100 dígitos
- *    v3.1
- *      - Modificado "nqrt"
- *        * cambio en las llamadas de "add" por "pAdd"
- *        * cambio en las llamadas de "equals" por "hardEquals"
- *        * cambio en las llamadas de "sub" por "pSub"
- *        * cambio en las llamadas de "bipow" por "sBipow"
- *        * incremento del rendimiento de 38'758% basado en 10.000 raices de índice 10
- *      - Nueva función "sBiPow", wrapper de "bipow" sin validación de BigInteger
- *      - Bugfix en "carryAdd"
- *    v3.11
- *      - Eliminada variable "max" en "divide"
- *      - Eliminada variable "x" en "pAppend"
+ *  v1.1
+ *    - Revisar las funciones y variables, hacer "static" convenientemente.
+ *    - Cambiar las referencias de punteros a "void" para evitar consumo de memoria
+ *    - Añadidas validaciones en las creaciones de BigInteger
+ *    - Nueva función BImemcpy para recuperar valores útiles de BigInteger
+ *    - Nueva función validateBI para validar la estructura de un BigInteger pasado como puntero
+ *  v1.2
+ *    - Añadida mejora de rendimiento para función pow
+ *  v1.3
+ *    - Parche para evitar acumulación de memoria
+ *    - Eliminada librería time.h (inecesaria)
+ *  v1.4
+ *    - Cambio de función BISQRT por nqrt, que realiza n-ésimas potencias.
+ *    - Eliminar "static" de BIT (innecesario)
+ *    - Creada función pAdd, wrapper de add sin validación de punteros para uso interno
+ *    - Creada función pSub, wrapper de sub sin validación de punteros para uso interno
+ *    - Creada función sMul, wrapper de mul sin validación de punteros para uso interno
+ *    - Modificados nombres de parámetros en la cabecera para nomenclatura coherente
+ *    - Eliminado error 19 (referencia innecesaria a BISQRT)
+ *    - Modificada función signum para trabajar con int en lugar de BigInteger.
+ *    ==> Reducido un 90,566% el consumo de memoria de nqrt a través del uso de wrappers
+ *    ==> Aumentado un 53,656% el rendimiento de nqrt a través del uso de wrappers
+ *      ==> Se usa nqrt como referencia debido a que nqrt -> pow -> mul -> pmul -> sum
+ *      Es el camino que más funciones concatena.
+ *  v1.5
+ *    - Cambio de función toString para que mueva los datos a un char* en lugar de printarlos
+ *  v1.51
+ *    - Eliminar librería conio.h (innecesaria)
+ *  v1.6
+ *    - Bugfix en validateBI para números negativos
+ *    - Bugfix en toString para números negativos
+ *  v2.0
+ *    - Test Integrado (324 operaciones distintas) finalizado. Cambios realizados
+ *    * Quitar validateBI de pSub
+ *    * Bugfix en suma si b < 0 y |a| < |b|
+ *    * Bugfix en suma si |a| < |b| y a, b < 0
+ *    * Buffix en división si a / b, b < 0
+ *    - Limpieza de código
+ *  v2.1
+ *    - Bugfix en funcion "division"
+ *  v2.2
+ *    - Optimización de memoria: arreglada fuga de memoria en validateBI
+ *  v2.3
+ *    - Renombrada función "pow" por "bipow" para evitar conflictos internos.
+ *  v2.4
+ *    - Solucionar error con división cuando len(a) - len(b) = 1
+ *  v2.5
+ *    - Cambio en nqrt para mejora de rendimiento. Cálculo de raíz por Bolzano
+ *  v2.51
+ *    - Bugfix en validateBI
+ *  v3.0
+ *    - Revisión general.
+ *    * Eliminadas líneas comentadas innecesarias
+ *    * Cambiada la firma de subtraction por subtract(a, b)
+ *    * Eliminada la función "rev" (innecesaria)
+ *    * Eliminada variable "min" de multiplicación
+ *    * Eliminada validación "a = -1" y "b = -1" de multiplicación, ya que nunca se darán
+ *    * Añadida validación de longitud en pMul para evitar heap overflow
+ *    * Cambio en sMul. En lugar de hacer los productos y sumar, se va realizando el sumatorio
+ *      de manera gradual, de esta manera se consume menos memoria y se incrementa el rendimiento
+ *      (-26'946% de tiempo empleado en 10.000 multiplicaciones con dos números de 50 cifras)
+ *    * Cambio en carryAdd. Se elimina el bucle "Do/While", ya que es innecesario. Con esto
+ *      se incrementa el rendimiento (-4'414% de tiempo empleado en 10.000 multiplicaciones con
+ *      dos números de 50 cifras)
+ *    * Eliminar función makeBase. Innecesaria
+ *    * Eliminar función shift. Innecesaria
+ *    * Nueva función iniStr. Reserva memoria para usar en toString
+ *    * Limpieza de código
+ *  v3.01
+ *    - Modificado "carrySub" para eliminar bucle "Do/While".
+ *  v3.02
+ *    - Modificado "carryAdd". El acarreo se hace en dos partes.
+ *    * Parte común: se evalúa todo el acarreo
+ *    * Parte no común: se evalúa hasta que no hay acarreo.
+ *    * Incremento del 3.448% de rendimiento con 10.000 sumas de 100 dígitos
+ *  v3.1
+ *    - Modificado "nqrt"
+ *      * cambio en las llamadas de "add" por "pAdd"
+ *      * cambio en las llamadas de "equals" por "hardEquals"
+ *      * cambio en las llamadas de "sub" por "pSub"
+ *    * cambio en las llamadas de "bipow" por "sBipow"
+ *      * incremento del rendimiento de 38'758% basado en 10.000 raices de índice 10
+ *    - Nueva función "sBiPow", wrapper de "bipow" sin validación de BigInteger
+ *    - Bugfix en "carryAdd"
+ *  v3.11
+ *    - Eliminar variable "max" en "divide"
+ *    - Eliminar vairable "x" en "pAppend"
+ *  v4.0
+ *    - Revisión para entrada en CUDA
+ *    * Cambio en "clean". Limpiamos el puntero directamente, ahorrando un 31'638% de rendimiento
+ *    * Cambio en "newBI". Usamos directamente el puntero, ahorrando un 5'479% de rendimiento
+ *    * Cambio en función de suma. Usamos directamente el puntero, ahorrando un 21'223% de rendimiento global
+ *      Se reduce el consumo de RAM en un 50%.
+ *    * Cambio en función de suma. Usamos directamente el puntero, ahorrando un 25'957% de rendimiento global
+ *      Se reduce el consumo de RAM en un 50%.
+ *    * Cambio en función de multiplicación. Usamos directamente el puntero, ahorrando un 26'901% de rendimiento global
+ *    * Cambio en función de división. Usamos directamente el puntero, ahorrando un 10'162% de rendimiento global
+ *    * Cambio en función de raíz. Usamos directamente el puntero, ahorrando un 11'837% de rendimiento global
+ *    * Cambio en función de potencia. Usamos directamente el puntero, ahorrando un 6'540% de rendimiento global
+ *    * Cambio en función de print. Usamos directamente el puntero, ahorrando un 8'878% de rendimiento global
+ *    * Cambio en función de append. Usamos directamente el puntero, ahorrando un 7'435% de rendimiento global
+ *    * Validaciones de puntero adicionales en nqrt
+ *    * Limpieza general de código
+ *    * Revisión y reestructuración de los códigos de error de showError
+ *    * En total, se eliminan 201 líneas de código con la optimización
+ *    - Bugfix en "validateBI"
+ *    - Cambiada función "dvs" para delegar en función estática "sDvs"
+ *    - Cambiada función "nqrt" para delegar en función estática "sNqrt"
+ *    - Nueva función "_free" para liberar memoria masivamente
+ *    - Bugfix en toString para números negativos
+ *    - Pasamos algunas variables a static
+ *    - Eliminada librería "limits.h"
+ *    - Resultados de PU
+ *    * Añadido valor por defecto en BImemcpy: 0
+ *    * Llamada a clean en pAppend
+ *    * Bugfix en append de números negativos
+ *    * Bugfix en division (0 / 0 = 1)
+ *    * Bugfix en raíz de índice 0 y negativo
+ *    * Bugfix en potencia de índice negativo
  */
 #include "stdio.h"
 #include "stdlib.h"
 #include "string.h"
-#include "limits.h"
+#include "stdarg.h"
 #include "BigInteger.h"
 
-int MAX_LENGTH = 4096;
-float BI_VERSION = 3.11f;
+static int MAX_LENGTH = 4096;
+static float BI_VERSION = 4.0f;
 
 /*
  * Función initialize
@@ -122,20 +154,22 @@ static void _BI_initialize() {
  */
 void BImemcpy(void* dst, int value) {
   if (ini == 0) {
-    ini = 1;
-    _BI_initialize();
+  ini = 1;
+  _BI_initialize();
   }
   
   if (value == 0)
     memcpy(dst, &_ZERO, sizeof(struct BigInteger));
-  else if(value == 1)
+  else if (value == 1)
     memcpy(dst, &_ONE, sizeof(struct BigInteger));
-  else if(value == 10)
+  else if (value == 10)
     memcpy(dst, &_TEN, sizeof(struct BigInteger));
-  else if(value == 100)
+  else if (value == 100)
     memcpy(dst, &_HUND, sizeof(struct BigInteger));
-  else if(value == -1)
+  else if (value == -1)
     memcpy(dst, &_MIN, sizeof(struct BigInteger));
+  else
+    BImemcpy(dst, 0);
 }
 
 /*
@@ -146,40 +180,31 @@ void BImemcpy(void* dst, int value) {
  * Si "sig" es -1, se crea el número en negativo
  */
 void newBI(void *dst, char* s, int sig){
-  struct BigInteger* ret = (struct BigInteger*)malloc(sizeof(struct BigInteger));
   int i = strlen(s) - 1;
   int f = i;
   int j = 0;
   int c;
 
-  //validamos puntero
-  if (ret == NULL) 
-    showError(2);
-
   //limpiamos el array
-  clean(ret);
+  clean(dst);
 
   if (i > MAX_LENGTH)
-    showError(1);
+  showError(1);
 
   //recorremos el string y lo guardamos en integers
   for (; i >= 0; i--) {
     c = (int)(s[i] - 48);
 
     if (c >= 0 && c <= 9)
-      ret->n[j++] = c;
+      ((struct BigInteger*)dst)->n[j++] = c;
     else
-      showError(3);
+      showError(2);
   }
 
-  ret->count = f;
+  ((struct BigInteger*)dst)->count = f;
 
   if(sig == -1)
-    ret->n[ret->count] *= -1;
-
-  memcpy(dst, ret, sizeof(struct BigInteger));
-
-  free(ret);
+  ((struct BigInteger*)dst)->n[((struct BigInteger*)dst)->count] *= -1;
 }
 
 /*
@@ -189,47 +214,32 @@ void newBI(void *dst, char* s, int sig){
  *
  * Si los signos son iguales, hace una suma, sino, una resta.
  */
-static void pAdd(void *va, void *vb){
-  struct BigInteger* a = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-  struct BigInteger* b = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-
-  if (a == NULL || b == NULL)
-    showError(4);
-
-  memcpy(a, va, sizeof(struct BigInteger));
-  memcpy(b, vb, sizeof(struct BigInteger));
-
-  int sig = signum(a->n[a->count], b->n[b->count]);
+static void pAdd(void *va, void *vb){   
+  int sig = signum(((struct BigInteger*)va)->n[((struct BigInteger*)va)->count],
+           ((struct BigInteger*)vb)->n[((struct BigInteger*)vb)->count]);
 
   //normalizamos los operandos
   if(sig == 10)
-    //a negativo, b positivo. Cambiamos el signo de "a" y hacemos suma
-    a->n[a->count] *= -1;
+  //a negativo, b positivo. Cambiamos el signo de "a" y hacemos suma
+  ((struct BigInteger*)va)->n[((struct BigInteger*)va)->count] *= -1;
   else if (sig == 1)
-    //b negativo, a positivo. Cambiamos el signo de "b" y hacemos suma
-    b->n[b->count] *= -1;
+  //b negativo, a positivo. Cambiamos el signo de "b" y hacemos suma
+  ((struct BigInteger*)vb)->n[((struct BigInteger*)vb)->count] *= -1;
   else if (sig == 11){
-    //a negativo, b negativo. Cambiamos signos y hacemos suma
-    a->n[a->count] *= -1;
-    b->n[b->count] *= -1;
+  //a negativo, b negativo. Cambiamos signos y hacemos suma
+  ((struct BigInteger*)va)->n[((struct BigInteger*)va)->count] *= -1;
+  ((struct BigInteger*)vb)->n[((struct BigInteger*)vb)->count] *= -1;
   }
 
   //si ambos signos son iguales, se suma, sino, se resta
   if (sig == 0 || sig == 11)
-    addition(a, b);
+  addition(va, vb);
   else 
-    pSub(a, b);
+  pSub(va, vb);
 
   if(sig == 10 || sig == 11)
-    //en estos casos, siempre se le va la vuelta al signo
-    a->n[a->count] *= -1;
-
-  //ajustamos el resultado
-  memcpy(va, a, sizeof(struct BigInteger));
-
-  //liberamos memoria
-  free(a);
-  free(b);
+  //en estos casos, siempre se le va la vuelta al signo
+  ((struct BigInteger*)va)->n[((struct BigInteger*)va)->count] *= -1;
 }
 
 /*
@@ -254,46 +264,42 @@ void add(void *va, void *vb){
  * Simula la operación a = a + b
  */
 static void addition(void* va, void* vb) {
-  struct BigInteger* a = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-  struct BigInteger* b = (struct BigInteger*)malloc(sizeof(struct BigInteger));
   int limit;
   int min;
+  int swap;
   int move;
   int i;
 
-  if (a == NULL || b == NULL)
-    showError(5);
-
-  memcpy(a, va, sizeof(struct BigInteger));
-  memcpy(b, vb, sizeof(struct BigInteger));
-
   //asumimos que a tiene la mayor longitud
-  limit = a->count;
+  limit = ((struct BigInteger*)va)->count;
 
   //asumimos que b tiene la menor longitud
-  min = b->count;
+  min = ((struct BigInteger*)vb)->count;
 
   //indicador de necesidad de arrastre
   move = 0;
   i = 0;
 
   //si no es así, rectificamos
-  if(b->count > limit){
-    limit = b->count;
-    min = a->count;
-    move = 1;
+  if(((struct BigInteger*)vb)->count > limit){
+  //intercambiamos limit y min
+  swap = limit;
+  limit = min;
+  min = swap;
+
+  move = 1;
   }
 
   //sumamos los dígitos que coinciden
   for(;i <= min;i++)
-    a->n[i] += b->n[i];
+  ((struct BigInteger*)va)->n[i] += ((struct BigInteger*)vb)->n[i];
 
   //los dígitos que no coinciden los traspasamos
   if(move == 1){
-    for(;i <= limit;i++)
-      a->n[i] = b->n[i];
+  for(;i <= limit;i++)
+    ((struct BigInteger*)va)->n[i] = ((struct BigInteger*)vb)->n[i];
 
-    a->count = limit;
+  ((struct BigInteger*)va)->count = limit;
   }
 
   //gestionamos el acarreo
@@ -302,14 +308,7 @@ static void addition(void* va, void* vb) {
    * Si a->count > b->count --> min = b->count (Se hará la gestión en dos partes)
    * Si a->count < b->count --> min = a->count (Se hará la gestión en dos partes)
    */
-  carryAdd(a, 1, min);
-
-  //ajustamos resultado
-  memcpy(va, a, sizeof(struct BigInteger));
-
-  //liberamos memoria
-  free(a);
-  free(b);
+  carryAdd(va, 1, min);
 }
 
 /*
@@ -322,64 +321,52 @@ static void carryAdd(void* va, int move, int min) {
   int i = 0;
   int acc;
   int limit;
-  struct BigInteger* a = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-
-  if (a == NULL)
-    showError(6);
-
-  memcpy(a, va, sizeof(struct BigInteger));
 
   acc = 0;
 
   //move == 1 --> sabemos que hay una parte no común. En min está el límite de la parte común
   if (move == 1)
-    limit = min;
+  limit = min;
   else
-    limit = a->count;
+  limit = ((struct BigInteger*)va)->count;
 
   //recorremos a y vamos sumando el acarreo de la parte común
   for (; i <= limit; i++){
-    //sumamos acarreo
-    a->n[i] += acc;
+  //sumamos acarreo
+  ((struct BigInteger*)va)->n[i] += acc;
 
-    //como acc es int, podemos dividir entre 10 y sacar el acarreo
-    acc = a->n[i] / 10;
-    
-    if (acc > 0)
-      //normalizamos el número
-      a->n[i] = a->n[i] % 10;
+  //como acc es int, podemos dividir entre 10 y sacar el acarreo
+  acc = ((struct BigInteger*)va)->n[i] / 10;
+  
+  if (acc > 0)
+    //normalizamos el número
+    ((struct BigInteger*)va)->n[i] = ((struct BigInteger*)va)->n[i] % 10;
   }
 
   if (move == 1) {
-    //queda parte no común. Acarreamos hatsa que acc sea 0, ya que la parte no común ya está normalizada
-    while (acc > 0 && i <= a->count) {
-      //sumamos acarreo
-      a->n[i] += acc;
+  //queda parte no común. Acarreamos hatsa que acc sea 0, ya que la parte no común ya está normalizada
+  while (acc > 0 && i <= ((struct BigInteger*)va)->count) {
+    //sumamos acarreo
+    ((struct BigInteger*)va)->n[i] += acc;
 
-      //como acc es int, podemos dividir entre 10 y sacar el acarreo
-      acc = a->n[i] / 10;
+    //como acc es int, podemos dividir entre 10 y sacar el acarreo
+    acc = ((struct BigInteger*)va)->n[i] / 10;
 
-      if (acc > 0)
-        //normalizamos el número
-        a->n[i] = a->n[i] % 10;
+    if (acc > 0)
+    //normalizamos el número
+    ((struct BigInteger*)va)->n[i] = ((struct BigInteger*)va)->n[i] % 10;
 
     i++;
-    }
+  }
   }
 
   //si ha quedado acarreo, lo guardamos al final;
   if (acc > 0) {
-    if (a->count == MAX_LENGTH)
-      showError(1);
-    else 
-      a->n[++a->count] = acc;
+  if (((struct BigInteger*)va)->count == MAX_LENGTH)
+    showError(1);
+  else 
+    ((struct BigInteger*)va)->n[++(((struct BigInteger*)va)->count)] = acc;
   }
-
-  //ajustamos resultado
-  memcpy(va, a, sizeof(struct BigInteger));
-
-  //liberamos memoria
-  free(a);
 }
 
 /*
@@ -392,58 +379,43 @@ static void carryAdd(void* va, int move, int min) {
 static void pSub(void* va, void *vb){
   int sig;
   int comp;
-  struct BigInteger* a = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-  struct BigInteger* b = (struct BigInteger*)malloc(sizeof(struct BigInteger));
 
-  if (a == NULL || b == NULL)
-    showError(7);
-
-  memcpy(a, va, sizeof(struct BigInteger));
-  memcpy(b, vb, sizeof(struct BigInteger));
-
-  hardEquals(a, b, &comp);
-  sig = signum(a->n[a->count], b->n[b->count]);
+  hardEquals(va, vb, &comp);
+  sig = signum(((struct BigInteger*)va)->n[((struct BigInteger*)va)->count], 
+         ((struct BigInteger*)vb)->n[((struct BigInteger*)vb)->count]);
 
   //si ambos son negativos, comp = 1 significa a < b
   if((comp == 2 && sig < 11) || (comp == 1 && sig == 11)){
-    pSub(b, a);
+  pSub(vb, va);
 
-    //cambiamos el signo
-    b->n[b->count] *= -1;
+  //cambiamos el signo
+  ((struct BigInteger*)vb)->n[((struct BigInteger*)vb)->count] *= -1;
 
-    //reasignamos
-    memcpy(a, b, sizeof(struct BigInteger));
-  }else if(comp == 0){
-    a->n[0] = 0;
-    a->count = 0;
-  }else{
-    //normalizamos los signos
-    if(sig == 1)
-      b->n[b->count] *= -1;
-    else if(sig == 10)
-      a->n[a->count] *= -1;
-    else if(sig == 11){
-      a->n[a->count] *= -1;
-      b->n[b->count] *= -1;
-    }
-
-    //si tienen el mismo signo, se resta, sino se suma
-    if(sig == 0 || sig == 11)
-      subtract(a, b);
-    else 
-      pAdd(a, b);
-
-    if(sig == 10 || sig == 11)
-      //en estos casos, siempre se le va la vuelta al signo
-      a->n[a->count] *= -1;
+  //reasignamos
+  memcpy(va, vb, sizeof(struct BigInteger));
+  }else if(comp == 0)
+  BImemcpy(va, 0);
+  else{
+  //normalizamos los signos
+  if(sig == 1)
+    ((struct BigInteger*)vb)->n[((struct BigInteger*)vb)->count] *= -1;
+  else if(sig == 10)
+    ((struct BigInteger*)va)->n[((struct BigInteger*)va)->count] *= -1;
+  else if(sig == 11){
+    ((struct BigInteger*)va)->n[((struct BigInteger*)va)->count] *= -1;
+    ((struct BigInteger*)vb)->n[((struct BigInteger*)vb)->count] *= -1;
   }
 
-  //ajustamos el resultado
-  memcpy(va, a, sizeof(struct BigInteger));
+  //si tienen el mismo signo, se resta, sino se suma
+  if(sig == 0 || sig == 11)
+    subtract(va, vb);
+  else 
+    pAdd(va, vb);
 
-  //liberamos memoria
-  free(a);
-  free(b);
+  if(sig == 10 || sig == 11)
+    //en estos casos, siempre se le va la vuelta al signo
+    ((struct BigInteger*)va)->n[((struct BigInteger*)va)->count] *= -1;
+  }
 }
 
 /*
@@ -470,31 +442,16 @@ void sub(void *va, void *vb) {
 static void subtract(void *va, void *vb){
   int i = 0;
   int accType = 0;
-  struct BigInteger* a = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-  struct BigInteger* b = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-
-  if (a == NULL || b == NULL)
-    showError(8);
-
-  memcpy(a, va, sizeof(struct BigInteger));
-  memcpy(b, vb, sizeof(struct BigInteger));
 
   //restamos los dígitos comunes
-  for(;i <= b->count;i++)
-    a->n[i] -= b->n[i];
+  for(;i <= ((struct BigInteger*)vb)->count;i++)
+  ((struct BigInteger*)va)->n[i] -= ((struct BigInteger*)vb)->n[i];
 
   //si el último dígito es negativo
-  if(a->n[a->count] < 0)
-    accType = 1;
+  if(((struct BigInteger*)va)->n[((struct BigInteger*)va)->count] < 0)
+  accType = 1;
 
-  carrySub(a, accType);
-
-  //movemos el resultado
-  memcpy(va, a, sizeof(struct BigInteger));
-
-  //liberamos memoria
-  free(a);
-  free(b);
+  carrySub(va, accType);
 }
 
 /*
@@ -506,41 +463,29 @@ static void subtract(void *va, void *vb){
 static void carrySub(void *va, int carryType){
   int i = 0;
   int acc = 0;
-  struct BigInteger* a = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-
-  if (a == NULL)
-    showError(9);
-
-  memcpy(a, va, sizeof(struct BigInteger));
 
   if(carryType == 0){
-    for(;i <= a->count; i++){
-      //restamos el acarreo al número
-      a->n[i] -= acc;
+  for(;i <= ((struct BigInteger*)va)->count; i++){
+    //restamos el acarreo al número
+    ((struct BigInteger*)va)->n[i] -= acc;
 
-      if(a->n[i] < 0){
-        //normalizamos el número
-        a->n[i] += 10;
-        acc = 1;
-      }else
-        acc = 0;
-    }
+    if(((struct BigInteger*)va)->n[i] < 0){
+    //normalizamos el número
+    ((struct BigInteger*)va)->n[i] += 10;
+    acc = 1;
+    }else
+    acc = 0;
+  }
   }else{
-    //en esta opción, no es necesario pasar una segunda vez por acarreos.
-    for(i = 0;i < a->count;i++)
-      if(a->n[i] < 0)
-        //normalizamos el número
-        a->n[i] = a->n[i] * -1;
+  //en esta opción, no es necesario pasar una segunda vez por acarreos.
+  for(i = 0;i < ((struct BigInteger*)va)->count;i++)
+    if(((struct BigInteger*)va)->n[i] < 0)
+    //normalizamos el número
+    ((struct BigInteger*)va)->n[i] = ((struct BigInteger*)va)->n[i] * -1;
   }
 
   //contamos de nuevo los dígitos
-  recount(a);
-
-  //ajustamos el resultado
-  memcpy(va, a, sizeof(struct BigInteger));
-
-  //liberamos memoria
-  free(a);
+  recount(va);
 }
 
 /*
@@ -549,25 +494,12 @@ static void carrySub(void *va, int carryType){
  * Recuenta las cifras, para ver si hay que disminuir el conteo.
  */
 static void recount(void *va){
-  struct BigInteger* a = (struct BigInteger*)malloc(sizeof(struct BigInteger));
+  while(((struct BigInteger*)va)->n[((struct BigInteger*)va)->count--] == 0);
 
-  if (a == NULL)
-    showError(10);
+  ++((struct BigInteger*)va)->count;
 
-  memcpy(a, va, sizeof(struct BigInteger));
-
-  while(a->n[a->count--] == 0);
-
-  ++a->count;
-
-  if(a->count < 0)
-    a->count = 0;
-
-  //ajustamos el resultado
-  memcpy(va, a, sizeof(struct BigInteger));
-
-  //liberamos memoria
-  free(a);
+  if (((struct BigInteger*)va)->count < 0)
+    ((struct BigInteger*)va)->count = 0;
 }
 
 /*
@@ -592,14 +524,6 @@ void equals(void* va, void* vb, int* ret) {
 static void hardEquals(void* va, void* vb, int* ret){
   int i;
   int sig;
-  struct BigInteger* a = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-  struct BigInteger* b = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-
-  if (a == NULL || b == NULL)
-    showError(11);
-
-  memcpy(a, va, sizeof(struct BigInteger));
-  memcpy(b, vb, sizeof(struct BigInteger));
 
   /*calculamos el signo
    *
@@ -608,50 +532,47 @@ static void hardEquals(void* va, void* vb, int* ret){
    *10: a <  0, b >= 0
    *11: a <  0, b <  0
    */
-  sig = signum(a->n[a->count], b->n[b->count]);
+  sig = signum(((struct BigInteger*)va)->n[((struct BigInteger*)va)->count], 
+         ((struct BigInteger*)vb)->n[((struct BigInteger*)vb)->count]);
 
   if (sig == 1) 
-    //a >= 0, b < 0, por tanto a > b
-    *ret = 1;
+  //a >= 0, b < 0, por tanto a > b
+  *ret = 1;
   else if (sig == 10) 
-    //a < 0, b >= 0, por tanto a < b
-    *ret = 2;
+  //a < 0, b >= 0, por tanto a < b
+  *ret = 2;
   else {
-    //comparten signo. Hacemos comparación manual
-    *ret = 0;
+  //comparten signo. Hacemos comparación manual
+  *ret = 0;
 
-    if (a->count < b->count)
-      //si "a" tiene menos dígitos que "b"
+  if (((struct BigInteger*)va)->count < ((struct BigInteger*)vb)->count)
+    //si "a" tiene menos dígitos que "b"
+    * ret = 2;
+  else if (((struct BigInteger*)va)->count > ((struct BigInteger*)vb)->count)
+    //si "a" tiene más dítigos que "b"
+    * ret = 1;
+  else {
+    //tienen los mismos dígitos. Comparamos uno a uno.
+    for (i = ((struct BigInteger*)va)->count; i >= 0; i--) {
+    if (((struct BigInteger*)va)->n[i] < ((struct BigInteger*)vb)->n[i])
       * ret = 2;
-    else if (a->count > b->count)
-      //si "a" tiene más dítigos que "b"
+    else if ((((struct BigInteger*)va)->n[i] > ((struct BigInteger*)vb)->n[i]))
       * ret = 1;
-    else {
-      //tienen los mismos dígitos. Comparamos uno a uno.
-      for (i = a->count; i >= 0; i--) {
-        if (a->n[i] < b->n[i])
-          * ret = 2;
-        else if ((a->n[i] > b->n[i]))
-          * ret = 1;
 
-        if (*ret > 0)
-          break;
-      }
-    }
-    
-    if (sig == 11) {
-      //ambos tienen signo negativo. Cambiamos el retorno
-      //ya que se p. ej. -1 > -10
-      if (*ret == 2)
-        * ret = 1;
-      else if (*ret == 1)
-        * ret = 2;
+    if (*ret > 0)
+      break;
     }
   }
-
-  //liberamos memoria
-  free(a);
-  free(b);
+  
+  if (sig == 11) {
+    //ambos tienen signo negativo. Cambiamos el retorno
+    //ya que se p. ej. -1 > -10
+    if (*ret == 2)
+    * ret = 1;
+    else if (*ret == 1)
+    * ret = 2;
+  }
+  }
 }
 
 /*
@@ -665,66 +586,63 @@ static void sMul(void* va, void* vb) {
   struct BigInteger* part = (struct BigInteger*)malloc(sizeof(struct BigInteger));
   struct BigInteger* ret = (struct BigInteger*)malloc(sizeof(struct BigInteger));
   struct BIT* table = (struct BIT*)malloc(sizeof(struct BIT));
-  struct BigInteger* a = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-  struct BigInteger* b = (struct BigInteger*)malloc(sizeof(struct BigInteger));
   struct BigInteger* zero = (struct BigInteger*)malloc(sizeof(struct BigInteger));
   struct BigInteger* one = (struct BigInteger*)malloc(sizeof(struct BigInteger));
   int x;
   int comp;
   int calc = 0;
 
-  if (table == NULL || a == NULL || b == NULL || zero == NULL || one == NULL || part == NULL || ret == NULL)
-    showError(12);
+  if (table == NULL || zero == NULL || one == NULL || part == NULL || ret == NULL)
+  showError(3);
 
-  memcpy(a, va, sizeof(struct BigInteger));
-  memcpy(b, vb, sizeof(struct BigInteger));
   BImemcpy(zero, 0);
   BImemcpy(ret, 0);
   BImemcpy(one, 1);
 
   //si a = 0, no hace falta cálculo.
-  hardEquals(a, zero, &comp);
+  hardEquals(va, zero, &comp);
   
   if (comp == 0)
-    calc = 1;
+  calc = 1;
 
   //si b = 0, no hace falta cálculo.
-  hardEquals(b, zero, &comp);
+  hardEquals(vb, zero, &comp);
   
   if (comp == 0) {
-    memcpy(a, zero, sizeof(struct BigInteger));
-    calc = 1;
+  memcpy(va, zero, sizeof(struct BigInteger));
+  calc = 1;
   }
 
   //normalizamos los operandos
-  sig = signum(a->n[a->count], b->n[b->count]);
+  sig = signum(((struct BigInteger*)va)->n[((struct BigInteger*)va)->count], 
+         ((struct BigInteger*)vb)->n[((struct BigInteger*)vb)->count]);
 
   if (sig == 1)
-    b->n[b->count] *= -1;
+  ((struct BigInteger*)vb)->n[((struct BigInteger*)vb)->count] *= -1;
   else if (sig == 10)
-    a->n[a->count] *= -1;
+  ((struct BigInteger*)va)->n[((struct BigInteger*)va)->count] *= -1;
   else if (sig == 11) {
-    a->n[a->count] *= -1;
-    b->n[b->count] *= -1;
+  ((struct BigInteger*)va)->n[((struct BigInteger*)va)->count] *= -1;
+  ((struct BigInteger*)vb)->n[((struct BigInteger*)vb)->count] *= -1;
   }
 
   //si |a| = 1, entonces a * b = b (el signo se normaliza después).
-  hardEquals(a, one, &comp);
+  hardEquals(va, one, &comp);
 
   if (comp == 0) {
-    memcpy(a, b, sizeof(struct BigInteger));
-    calc = 1;
+  memcpy(va, vb, sizeof(struct BigInteger));
+  calc = 1;
   }
 
   //si |b| = 1, entonces a * b = a (el signo se normaliza después).
-  hardEquals(b, one, &comp);
+  hardEquals(vb, one, &comp);
   
   if (comp == 0)
-    calc = 1;
+  calc = 1;
 
   //inicializamos BIT
   memcpy(&table->BI[0], zero, sizeof(struct BigInteger));
-  memcpy(&table->BI[1], a, sizeof(struct BigInteger));
+  memcpy(&table->BI[1], va, sizeof(struct BigInteger));
 
   table->status[0] = 1;
   table->status[1] = 1;
@@ -739,53 +657,45 @@ static void sMul(void* va, void* vb) {
 
   //si el número no está ya calculado, lo calculamos
   if (calc == 0) {
-    //realizamos los productos parciales
-    for (i = 0; i <= b->count; i++) {
-      //validamos si BIT[n] existe
-      if (table->status[b->n[i]] == 0) {
-        clean(part);
-        //no tenemos el resultado. Calculamos el valor
-        for (x = 0; x <= a->count; x++)
-          part->n[x] = a->n[x] * b->n[i];
+  //realizamos los productos parciales
+  for (i = 0; i <= ((struct BigInteger*)vb)->count; i++) {
+    //validamos si BIT[n] existe
+    if (table->status[((struct BigInteger*)vb)->n[i]] == 0) {
+    clean(part);
+    //no tenemos el resultado. Calculamos el valor
+    for (x = 0; x <= ((struct BigInteger*)va)->count; x++)
+      part->n[x] = ((struct BigInteger*)va)->n[x] * ((struct BigInteger*)vb)->n[i];
 
-        part->count = x - 1;
-        carryAdd(part, 0, 0);
+    part->count = x - 1;
+    carryAdd(part, 0, 0);
 
-        //movemos el valor a BIT
-        memcpy(&table->BI[b->n[i]], part, sizeof(struct BigInteger));
-        table->status[b->n[i]] = 1;
-      }else 
-        //tenemos el resultado
-        memcpy(part, &table->BI[b->n[i]], sizeof(struct BigInteger));
+    //movemos el valor a BIT
+    memcpy(&table->BI[((struct BigInteger*)vb)->n[i]], part, sizeof(struct BigInteger));
+    //table->status[b->n[i]] = 1;
+    table->status[((struct BigInteger*)vb)->n[i]] = 1;
+    }else 
+    //tenemos el resultado
+    memcpy(part, &table->BI[((struct BigInteger*)vb)->n[i]], sizeof(struct BigInteger));
 
-      //multiplicación parcial
-      pMul(i, part);
+    //multiplicación parcial
+    pMul(i, part);
 
-      //sumamos
-      pAdd(ret, part);
+    //sumamos
+    pAdd(ret, part);
 
-      //inicializamos
-      BImemcpy(part, 0);
-    }
+    //inicializamos
+    BImemcpy(part, 0);
+  }
 
-    memcpy(a, ret, sizeof(struct BigInteger));
+  memcpy(va, ret, sizeof(struct BigInteger));
   }
 
   //si los signos son diferentes, invertimos el signo
   if (sig == 1 || sig == 10)
-    a->n[a->count] *= -1;
-
-  //ajustamos el resultado
-  memcpy(va, a, sizeof(struct BigInteger));
+  ((struct BigInteger*)va)->n[((struct BigInteger*)va)->count] *= -1;
 
   //liberamos memoria
-  free(part);
-  free(table);
-  free(a);
-  free(b);
-  free(zero);
-  free(one);
-  free(ret);
+  _free(5, part, table, zero, one, ret);
 }
 
 /*
@@ -808,33 +718,22 @@ void mul(void *va, void *vb){
  * Efectúa una multiplicación parcial de a y b
  */
 static void pMul(int pos, void *vpart){
-  struct BigInteger* part = (struct BigInteger*)malloc(sizeof(struct BigInteger));
   int i;
 
-  if (part == NULL)
-    showError(13);
-
-  memcpy(part, vpart, sizeof(struct BigInteger));
-  i = part->count + pos;
+  i = ((struct BigInteger*)vpart)->count + pos;
 
   if (i >= MAX_LENGTH)
-    showError(1);
+  showError(1);
 
   //generamos offset
   for (; i >= pos; i--) 
-    part->n[i] = part->n[i - pos];
+  ((struct BigInteger*)vpart)->n[i] = ((struct BigInteger*)vpart)->n[i - pos];
 
   //noramlizamos las posiciones de offset
   for (i = 0; i < pos; i++) 
-    part->n[i] = 0;
+  ((struct BigInteger*)vpart)->n[i] = 0;
 
-  part->count += pos;
-
-  //ajustamos resultado
-  memcpy(vpart, part, sizeof(struct BigInteger));
-
-  //liberamos memoria
-  free(part);
+  ((struct BigInteger*)vpart)->count += pos;
 }
 
 /*
@@ -842,67 +741,74 @@ static void pMul(int pos, void *vpart){
  *
  * Simula la operación a = a / b
  */
-void dvs(void *va, void *vb){
-  struct BigInteger* a = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-  struct BigInteger* b = (struct BigInteger*)malloc(sizeof(struct BigInteger));
+void dvs(void* va, void* vb) {
+  //validamos los datos antes de usarlos
+  validateBI(va);
+  validateBI(vb);
+
+  //delegamos en la función estática
+  sDvs(va, vb);
+}
+
+/*
+ * Función sDvs. Función para dividir dos números.
+ *
+ * Simula la operación a = a / b
+ */
+static void sDvs(void* va, void* vb){
   struct BigInteger* temp = (struct BigInteger*)malloc(sizeof(struct BigInteger));
   struct BigInteger* one = (struct BigInteger*)malloc(sizeof(struct BigInteger));
   int sig;
   int comp;
 
-  if (a == NULL || b == NULL || temp == NULL || one == NULL)
-    showError(14);
-
-  //validamos punteros
-  validateBI(va);
-  validateBI(vb);
-
-  memcpy(a, va, sizeof(struct BigInteger));
-  memcpy(b, vb, sizeof(struct BigInteger));
+  if (temp == NULL || one == NULL)
+  showError(4);
 
   BImemcpy(temp, 0);
   BImemcpy(one, 1);
 
-  sig = signum(a->n[a->count], b->n[b->count]);
+  sig = signum(((struct BigInteger*)va)->n[((struct BigInteger*)va)->count], 
+         ((struct BigInteger*)vb)->n[((struct BigInteger*)vb)->count]);
 
   //normalizamos los operandos
   if(sig == 1)
-    b->n[b->count] *= -1;
+  ((struct BigInteger*)vb)->n[((struct BigInteger*)vb)->count] *= -1;
   else if(sig == 10)
-    a->n[a->count] *= -1;
+  ((struct BigInteger*)va)->n[((struct BigInteger*)va)->count] *= -1;
   else if(sig == 11){
-    a->n[a->count] *= -1;
-    b->n[b->count] *= -1;
+  ((struct BigInteger*)va)->n[((struct BigInteger*)va)->count] *= -1;
+  ((struct BigInteger*)vb)->n[((struct BigInteger*)vb)->count] *= -1;
   }
 
-  hardEquals(a, b, &comp);
+  hardEquals(va, vb, &comp);
 
-  if (comp == 0)
+  if (comp == 0) {
     //si a = b, a/b = 1
-    memcpy(a, one, sizeof(struct BigInteger));
-  else if (comp == 2)
-    //si a < b, a / b = 0
-    memcpy(a, temp, sizeof(struct BigInteger));
-  else if(comp == 1){
-    //si a > b, buscamos un número que solucione ax = n
-    hardEquals(b, one, &comp);
+    hardEquals(va, temp, &comp);
 
-    if(comp != 0)
-      divide(a, b);
+    if (comp == 0)
+      //si a = 0 (por tanto, b = 0), retornamos 0
+      memcpy(va, temp, sizeof(struct BigInteger));
+    else
+      //en caso contrario, retornamos 1
+      memcpy(va, one, sizeof(struct BigInteger));
+  }else if (comp == 2)
+  //si a < b, a / b = 0
+  memcpy(va, temp, sizeof(struct BigInteger));
+  else if(comp == 1){
+  //si a > b, buscamos un número que solucione ax = n
+  hardEquals(vb, one, &comp);
+
+  if(comp != 0)
+    divide(va, vb);
   }
 
   //si los signos son diferentes, invertimos el signo
   if (sig == 1 || sig == 10)
-    a->n[a->count] *= -1;
-
-  //ajustamos resultado
-  memcpy(va, a, sizeof(struct BigInteger));
+  ((struct BigInteger*)va)->n[((struct BigInteger*)va)->count] *= -1;
 
   //liberamos memoria
-  free(a);
-  free(b);
-  free(temp);
-  free(one);
+  _free(2, temp, one);
 }
 
 /*
@@ -911,8 +817,6 @@ void dvs(void *va, void *vb){
  * Realiza la división utilizando el teorema de Bolzano
  */
 static void divide(void *va, void *vb){
-  struct BigInteger* a = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-  struct BigInteger* b = (struct BigInteger*)malloc(sizeof(struct BigInteger));
   struct BIT *table = (struct BIT*)malloc(sizeof(struct BIT));
   struct BigInteger* dTemp = (struct BigInteger*)malloc(sizeof(struct BigInteger));
   struct BigInteger* ret = (struct BigInteger*)malloc(sizeof(struct BigInteger));
@@ -927,20 +831,18 @@ static void divide(void *va, void *vb){
   int mLen;
   int added;
 
-  if (a == NULL || b == NULL || table == NULL || dTemp == NULL || ret == NULL || temp == NULL || biTemp == NULL)
-    showError(15);
+  if (table == NULL || dTemp == NULL || ret == NULL || temp == NULL || biTemp == NULL)
+  showError(5);
 
-  memcpy(a, va, sizeof(struct BigInteger));
-  memcpy(b, vb, sizeof(struct BigInteger));
   BImemcpy(ret, 0);
 
-  len = a->count - b->count;
+  len = ((struct BigInteger*)va)->count - ((struct BigInteger*)vb)->count;
   ret->count = 0;
   dTemp->count = 0;
   
   //llenamos BIT
   BImemcpy(&table->BI[0], 0);
-  memcpy(&table->BI[1], b, sizeof(struct BigInteger));
+  memcpy(&table->BI[1], vb, sizeof(struct BigInteger));
 
   table->status[0] = 1;
   table->status[1] = 1;
@@ -963,124 +865,115 @@ static void divide(void *va, void *vb){
    * Nos quedamos con los "b.count" primeros dígitos. Si "b" tiene un único
    * dígito, no movemos nada, porque ya moveremos el siguiente dígito más adelante
    */
-  if (b->count > 0) 
-    for(;i < b->count;i++)
-      dTemp->n[b->count - i - 1] = a->n[a->count - i];
+  if (((struct BigInteger*)vb)->count > 0)
+  for(;i < ((struct BigInteger*)vb)->count;i++)
+    dTemp->n[((struct BigInteger*)vb)->count - i - 1] = ((struct BigInteger*)va)->n[((struct BigInteger*)va)->count - i];
   else 
-    dTemp->n[0] = 0;
+  dTemp->n[0] = 0;
 
-  dTemp->count = b->count - 1;
+  dTemp->count = ((struct BigInteger*)vb)->count - 1;
 
   //si "b" tiene una cifra, b.len será 0 pero tenemos que restar una cifra igualmente
-  if (b->count == 0)
-    mLen = len - 1;
+  if (((struct BigInteger*)vb)->count == 0)
+  mLen = len - 1;
   else
-    mLen = len;
+  mLen = len;
 
   //por cada cifra decimal que hemos generado
   for (i = 0; i <= len; i++) {
-    //hacemos BI temporal
-    temp->count = 0;
-    temp->n[0] = a->n[len - i];
+  //hacemos BI temporal
+  temp->count = 0;
+  temp->n[0] = ((struct BigInteger*)va)->n[len - i];
 
-    pAppend(temp, dTemp);
-    memcpy(dTemp, temp, sizeof(struct BigInteger));
+  pAppend(temp, dTemp);
+  memcpy(dTemp, temp, sizeof(struct BigInteger));
 
-    //Retorna 0 si son iguales, retorna 1 si a > b, retorna 2 si a < b.
-    hardEquals(dTemp, &table->BI[currentBIT], &eq);
+  //Retorna 0 si son iguales, retorna 1 si a > b, retorna 2 si a < b.
+  hardEquals(dTemp, &table->BI[currentBIT], &eq);
 
-    x = currentBIT;
+  x = currentBIT;
 
-    if (eq == 1) {
-      //si dTemp > max, partimos de ese valor y hasta el máximo.
-      
-      //recuperamos el último BI
-      memcpy(biTemp, &table->BI[x], sizeof(struct BigInteger));
+  if (eq == 1) {
+    //si dTemp > max, partimos de ese valor y hasta el máximo.
+    
+    //recuperamos el último BI
+    memcpy(biTemp, &table->BI[x], sizeof(struct BigInteger));
+    added = 0;
+
+    for (; x < 10; x++) {
+    //le sumamos la base
+    pAdd(biTemp, vb);
+
+    //lo añadimos a BIT, si no hemos llenado la tabla (rellenamos siempre por adelantado)
+    if (currentBIT < 9) {
+      memcpy(&table->BI[++currentBIT], biTemp, sizeof(struct BigInteger));
+      table->status[currentBIT] = 1;
+      added = 1;
+    }else
       added = 0;
 
-      for (; x < 10; x++) {
-        //le sumamos la base
-        pAdd(biTemp, b);
+    //validamos si nos sirve
+    hardEquals(dTemp, biTemp, &eq);
 
-        //lo añadimos a BIT, si no hemos llenado la tabla (rellenamos siempre por adelantado)
-        if (currentBIT < 9) {
-          memcpy(&table->BI[++currentBIT], biTemp, sizeof(struct BigInteger));
-          table->status[currentBIT] = 1;
-          added = 1;
-        }else
-          added = 0;
-
-        //validamos si nos sirve
-        hardEquals(dTemp, biTemp, &eq);
-
-        if (eq == 0) {
-          //si dTemp = temp
-          res = currentBIT;
-          x = 99;
-        }else if (eq == 2) {
-          //si dTemp < max, según el teorema de Bolzano, hemos pasado por dTemp = max, 
-          //por tanto, el valor correcto es el anterior
-          //si no hemos llegado al final de la tabla, será el índice anterior
-          //si hemos llegado al final de la tabla, será el índice actual
-          if (added == 1)
-            res = (currentBIT - 1);
-          else
-            res = currentBIT;
-
-          x = 99;
-        }
-      }
-    }else if (eq == 0) 
-      //si dTemp = max, ya tenemos el valor
+    if (eq == 0) {
+      //si dTemp = temp
       res = currentBIT;
-    else if (eq == 2) {
-      //si dTemp < max, partimos de ese valor y hasta 0
-      --x;
+      x = 99;
+    }else if (eq == 2) {
+      //si dTemp < max, según el teorema de Bolzano, hemos pasado por dTemp = max, 
+      //por tanto, el valor correcto es el anterior
+      //si no hemos llegado al final de la tabla, será el índice anterior
+      //si hemos llegado al final de la tabla, será el índice actual
+      if (added == 1)
+      res = (currentBIT - 1);
+      else
+      res = currentBIT;
 
-      for (; x >= 0; x--) {
-        //validamos si nos sirve
-        hardEquals(dTemp, &table->BI[x], &eq);
-
-        if (eq == 0) {
-          //si dTemp = temp
-          res = x;
-          x = -99;
-        }else if (eq == 1) {
-          //si dTemp > max, según el teorema de Bolzano, hemos pasado por dTemp = max, 
-          //por tanto, el valor correcto es el siguiente
-          res = x;
-          x = -99;
-        }
-      }
+      x = 99;
     }
+    }
+  }else if (eq == 0) 
+    //si dTemp = max, ya tenemos el valor
+    res = currentBIT;
+  else if (eq == 2) {
+    //si dTemp < max, partimos de ese valor y hasta 0
+    --x;
 
-    ret->n[len - i] = res;
+    for (; x >= 0; x--) {
+    //validamos si nos sirve
+    hardEquals(dTemp, &table->BI[x], &eq);
 
-    //restamos
-    pSub(dTemp, &table->BI[res]);
+    if (eq == 0) {
+      //si dTemp = temp
+      res = x;
+      x = -99;
+    }else if (eq == 1) {
+      //si dTemp > max, según el teorema de Bolzano, hemos pasado por dTemp = max, 
+      //por tanto, el valor correcto es el siguiente
+      res = x;
+      x = -99;
+    }
+    }
+  }
+
+  ret->n[len - i] = res;
+
+  //restamos
+  pSub(dTemp, &table->BI[res]);
   }
 
   ret->count = mLen;
 
-  memcpy(a, ret, sizeof(struct BigInteger));
+  memcpy(va, ret, sizeof(struct BigInteger));
 
-  recount(a);
+  recount(va);
   
   //evitar error de falso desbordamiento
-  if (a->n[a->count + 1] > 0)
-    ++a->count;
-  
-  //ajustamos valores
-  memcpy(va, a, sizeof(struct BigInteger));
+  if (((struct BigInteger*)va)->n[((struct BigInteger*)va)->count + 1] > 0)
+    ++((struct BigInteger*)va)->count;
 
   //liberamos memoria
-  free(table);
-  free(a);
-  free(b);
-  free(dTemp);
-  free(ret);
-  free(temp);
-  free(biTemp);
+  _free(5, table, dTemp, ret, temp, biTemp);
 }
 
 /*
@@ -1089,7 +982,19 @@ static void divide(void *va, void *vb){
  * Realiza la raíz enésima de a.
  */
 void nqrt(void* va, int n) {
-  struct BigInteger* a = (struct BigInteger*)malloc(sizeof(struct BigInteger));
+  //validamos punteros
+  validateBI(va);
+
+  //delegamos en la función estática
+  sNqrt(va, n);
+}
+
+/*
+ * Función sNqrt.
+ *
+ * Realiza la raíz enésima de a.
+ */
+static void sNqrt(void* va, int n){
   struct BigInteger* ret = (struct BigInteger*)malloc(sizeof(struct BigInteger));
   struct BigInteger* raw = (struct BigInteger*)malloc(sizeof(struct BigInteger));
   struct BigInteger* base = (struct BigInteger*)malloc(sizeof(struct BigInteger));
@@ -1097,17 +1002,21 @@ void nqrt(void* va, int n) {
   int lmax = 0;
   int isEq = 0;
 
-  if (a == NULL)
-    showError(26);
+  if (ret == NULL || raw == NULL || base == NULL || zero == NULL)
+    showError(9);
 
-  //validamos punteros
-  validateBI(va);
   BImemcpy(base, 0);
   BImemcpy(zero, 0);
 
-  memcpy(a, va, sizeof(struct BigInteger));
+  //si el índice de la raíz es 0, devolvemos 0
+  if (n <= 0) {
+    memcpy(va, zero, sizeof(struct BigInteger));
+    _free(4, ret, raw, base, zero);
 
-  lmax = a->count / 2;
+    return;
+  }
+
+  lmax = ((struct BigInteger*)va)->count / 2;
 
   //creamos una base
   base->n[lmax] = 1;
@@ -1119,48 +1028,45 @@ void nqrt(void* va, int n) {
 
   //calculamos la potencia
   sBipow(ret, n);
-  hardEquals(ret, a, &isEq);
+  hardEquals(ret, va, &isEq);
 
   while (isEq != 0) {
-    while (isEq == 2) {
-      //ret < a. Incrementamos y probamos de nuevo hasta el exceso
-      pAdd(raw, base);
+  while (isEq == 2) {
+    //ret < a. Incrementamos y probamos de nuevo hasta el exceso
+    pAdd(raw, base);
 
-      memcpy(ret, raw, sizeof(struct BigInteger));
+    memcpy(ret, raw, sizeof(struct BigInteger));
 
-      sBipow(ret, n);
-      hardEquals(ret, a, &isEq);
-    }
+    sBipow(ret, n);
+    hardEquals(ret, va, &isEq);
+  }
 
-    //una vez aquí, siempre se dará ret >= a
-    if (isEq == 1) {
-      //si a > ret, retrocedemos 1 posición base y vamos a ajustar la posición anterior
-      pSub(raw, base);
+  //una vez aquí, siempre se dará ret >= a
+  if (isEq == 1) {
+    //si a > ret, retrocedemos 1 posición base y vamos a ajustar la posición anterior
+    pSub(raw, base);
 
-      base->n[lmax] = 0;
-      --lmax;
-      base->n[lmax] = 1;
-      --base->count;
+    base->n[lmax] = 0;
+    --lmax;
+    base->n[lmax] = 1;
+    --base->count;
 
-      //calculamos la potencia y comparamos (siempre será a < ret, ya que si fuera a = ret no hubiera entrado).
-      hardEquals(base, zero, &isEq);
+    //calculamos la potencia y comparamos (siempre será a < ret, ya que si fuera a = ret no hubiera entrado).
+    hardEquals(base, zero, &isEq);
 
-      //si base > 0, aún hay que iterar
-      if (isEq == 1)
-        isEq = 2;
-      else
-        //en caso contrario, hemos llegado a la máxima aproximación posible
-        isEq = 0;
-    }
+    //si base > 0, aún hay que iterar
+    if (isEq == 1)
+    isEq = 2;
+    else
+    //en caso contrario, hemos llegado a la máxima aproximación posible
+    isEq = 0;
+  }
   }
 
   memcpy(va, raw, sizeof(struct BigInteger));
 
-  free(a);
-  free(ret);
-  free(raw);
-  free(base);
-  free(zero);
+  //liberamos memoria
+  _free(4, ret, raw, base, zero);
 }
 
 /*
@@ -1169,44 +1075,26 @@ void nqrt(void* va, int n) {
  * Simula la operación a = a^p
  */
 void bipow(void *va, int p) {
-  struct BigInteger *a = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-
-  if (a == NULL)
-    showError(20);
-
   //validamos puntero
   validateBI(va);
 
-  memcpy(a, va, sizeof(struct BigInteger));
-
   if (p == 0)
-    //n^0 = 1
-    BImemcpy(a, 1);
-  else if (p == 1) {
-    //n^1 = n
-    //limpiamos memoria
-    free(a);
-
-    return;
-  }else {
-    sBipow(a, p);
-  }
-
-  //ajustamos resultado
-  memcpy(va, a, sizeof(struct BigInteger));
-
-  //limpiamos memoria
-  free(a);
+  //n^0 = 1
+  BImemcpy(va, 1);
+  else if (p == 1) 
+  //n^1 = n
+  return;
+  else 
+  sBipow(va, p);
 }
 
 /*
- * Función bipow.
+ * Función sBipow.
  *
  * Simula la operación a = a^p
  */
 static void sBipow(void* va, int p) {
   struct BigInteger* res = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-  struct BigInteger* a = (struct BigInteger*)malloc(sizeof(struct BigInteger));
   struct BigInteger* tmp = (struct BigInteger*)malloc(sizeof(struct BigInteger));
   int d2b[10];
   int d2bi = 0;
@@ -1214,32 +1102,38 @@ static void sBipow(void* va, int p) {
   int t = p;
   int i = 0;
 
-  if(res == NULL || a == NULL || tmp == NULL)
-    showError(20);
+  if(res == NULL || tmp == NULL)
+    showError(6);
+
+  if (p < 0) {
+    BImemcpy(va, 0);
+    _free(2, res, tmp);
+
+    return;
+  }
 
   BImemcpy(res, 1);
-  memcpy(a, va, sizeof(struct BigInteger));
 
   /*
-   * 1.2: Factorizamos la potencia en base 2 para poder
-   *      mejorar el rendimiento de la operación
-   *
-   *      Como funciona
-   *       - Convertimos el exponente en base 2, y almacenamos
-   *         los datos en un array.
-   *
-   *       - Por cada iteración, vamos calculando a^2^i, es decir
-   *         a^0, a^2, a^4, a^8, a^16, ...
-   *
-   *       - Si la posición de d2b es 1, multiplicamos, y de esta manera
-   *         obtenemos el resultado.
-   *
-   *         Por ejemplo 8^12
-   *           12 = 1100 (aunque se guarda como 0011) ==> 4 + 8
-   *           8^12 = 8^4 * 8^8 = 8^(4+8)
-   *
-   *         De esta manera, hacemos únicamente 8 multiplicaciones en lugar de 12
-   *         (para este ejemplo). En números más grandes la diferencia sería aún mayor
+   *  Factorizamos la potencia en base 2 para poder
+   *  mejorar el rendimiento de la operación
+   *  
+   *  Como funciona
+   *   - Convertimos el exponente en base 2, y almacenamos
+   *   los datos en un array.
+   *  
+   *   - Por cada iteración, vamos calculando a^2^i, es decir
+   *   a^0, a^2, a^4, a^8, a^16, ...
+   *  
+   *   - Si la posición de d2b es 1, multiplicamos, y de esta manera
+   *   obtenemos el resultado.
+   *  
+   *   Por ejemplo 8^12
+   *     12 = 1100 (aunque se guarda como 0011) ==> 4 + 8
+   *     8^12 = 8^4 * 8^8 = 8^(4+8)
+   *  
+   *   De esta manera, hacemos únicamente 8 multiplicaciones en lugar de 12
+   *   (para este ejemplo). En números más grandes la diferencia sería aún mayor
    */
    //conversión de decimal a binario
   while (t > 0 && d2bi < 10) {
@@ -1255,13 +1149,13 @@ static void sBipow(void* va, int p) {
 
   //si el número es muy grande, damos error
   if (t > 0 && d2bi >= 10)
-    showError(25);
+    showError(8);
 
   //iteramos sobre el número binario
   for (; i < d2bi; i++) {
     //calculamos (a^(2^i))
     if (i == 0)
-      memcpy(tmp, a, sizeof(struct BigInteger));
+      memcpy(tmp, va, sizeof(struct BigInteger));
     else
       sMul(tmp, tmp);
 
@@ -1271,9 +1165,7 @@ static void sBipow(void* va, int p) {
 
   memcpy(va, res, sizeof(struct BigInteger));
 
-  free(res);
-  free(a);
-  free(tmp);
+  _free(2, res, tmp);
 }
 
 /*
@@ -1283,53 +1175,25 @@ static void sBipow(void* va, int p) {
  */
 static void showError(int k){
   if (k == 1)
-    printf("Error. Limite alcanzado");
+  printf("Error. Limite alcanzado");
   else if (k == 2)
-    printf("Error. Puntero erróneo en newBI");
+  printf("Error. Datos erróneos en newBI");
   else if (k == 3)
-    printf("Error. Datos erróneos en newBI");
+  printf("Error. Puntero erróneo en mul");
   else if (k == 4)
-    printf("Error. Puntero erróneo en add");
+  printf("Error. Puntero erróneo en dvs");
   else if (k == 5)
-    printf("Error. Puntero erróneo en addition");
+  printf("Error. Puntero erróneo en divide");
   else if (k == 6)
-    printf("Error. Puntero erróneo en carryAdd");
+  printf("Error. Puntero erróneo en sBipow");
   else if (k == 7)
-    printf("Error. Puntero erróneo en sub");
+  printf("Error. Puntero erróneo en pAppend");
   else if (k == 8)
-    printf("Error. Puntero erróneo en subraction");
+  printf("Error. Exponente demasiado grande");
   else if (k == 9)
-    printf("Error. Puntero erróneo en carrySub");
-  else if (k == 10)
-    printf("Error. Puntero erróneo en recount");
-  else if (k == 11)
-    printf("Error. Puntero erróneo en hardEquals");
-  else if (k == 12)
-    printf("Error. Puntero erróneo en mul");
-  else if (k == 13)
-    printf("Error. Puntero erróneo en pMul");
-  else if (k == 14)
-    printf("Error. Puntero erróneo en dvs");
-  else if (k == 15)
-    printf("Error. Puntero erróneo en divide");
-  else if (k == 18)
-    printf("Error. Puntero erróneo en rev");
-  else if (k == 20)
-    printf("Error. Puntero erróneo en pow");
-  else if (k == 21)
-    printf("Error. Puntero erróneo en toString");
-  else if (k == 22)
-    printf("Error. Puntero erróneo en pAppend");
-  else if (k == 23)
-    printf("Error. Puntero erróneo en clean");
-  else if (k == 24)
-    printf("Error. Puntero erróneo en signum");
-  else if (k == 25)
-    printf("Error. Exponente demasiado grande");
-  else if (k == 26)
-    printf("Error. Puntero erróneo en nqrt");
+  printf("Error. Puntero erróneo en nqrt");
   else if (k == 98)
-    printf("Error. Puntero erróneo en validateBI");
+  printf("Error. Puntero erróneo en validateBI");
   else if (k == 99)
     printf("Error. Error de validación de datos");
   else
@@ -1355,30 +1219,28 @@ void iniStr(char** dst) {
  * Escribe en pantalla el BigInteger
  */
 void toString(void *vb, char* dst){
-  struct BigInteger* b = (struct BigInteger*)malloc(sizeof(struct BigInteger));
   int i = 0;
-
-  if (b == NULL)
-    showError(21);
+  int m = ((struct BigInteger*)vb)->count;
+  int sig = 0;
 
   //validamos puntero
   validateBI(vb);
-
-  memcpy(b, vb, sizeof(struct BigInteger));
   
   //si el primer dígito es negativo, lo volvemos positivo y marcamos el caracter
-  if (b->n[b->count] < 0) {
-    b->n[b->count] *= -1;
-    dst[i++] = '-';
+  if (((struct BigInteger*)vb)->n[m] < 0) {
+  ((struct BigInteger*)vb)->n[m] *= -1;
+  dst[i++] = '-';
+  sig = 1;
   }
 
-  for (; b->count >= 0; b->count--)
-    dst[i++] = (char)(b->n[b->count] + 48);
+  for (; m >= 0; m--)
+  dst[i++] = (char)(((struct BigInteger*)vb)->n[m] + 48);
 
   dst[i] = '\0';
 
-  //libreamos memoria
-  free(b);
+  //estamos trabajando sobre el puntero, revisamos y reestablecemos valores
+  if (sig == 1)
+    ((struct BigInteger*)vb)->n[((struct BigInteger*)vb)->count] *= -1;
 }
 
 /*
@@ -1406,52 +1268,64 @@ void append(void *va, void *vb){
  * a = 2 y b = 1 (ya que los array de BigInteger van al revés.
  */
 static void pAppend(void *va, void *vb){
-  struct BigInteger* a = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-  struct BigInteger* b = (struct BigInteger*)malloc(sizeof(struct BigInteger));
   struct BigInteger* aux = (struct BigInteger*)malloc(sizeof(struct BigInteger));
   int i = 0;
+  int sig;
 
-  if (a == NULL || b == NULL || aux == NULL)
-    showError(22);
-
-  memcpy(a, va, sizeof(struct BigInteger));
-  memcpy(b, vb, sizeof(struct BigInteger));
+  if (aux == NULL)
+  showError(7);
 
   //si b = 0, no hacemos nada
-  if (b->count == 0 && b->n[0] == 0) {
-    //libreamos memoria
-    free(a);
-    free(b);
-    free(aux);
+  if (((struct BigInteger*)vb)->count == 0 && ((struct BigInteger*)vb)->n[0] == 0) {
+  //libreamos memoria
+  free(aux);
 
-    return;
+  return;
   }
 
   aux->count = 0;
 
-  if (a->count == 0) {
-    for (; i <= b->count; i++)
-      a->n[++a->count] = b->n[i];
-  }else {
-    //ponemos tantos 0's como posiciones tenga "a"
-    for (; i <= a->count; i++)
-      aux->n[aux->count++] = 0;
+  sig = signum(((struct BigInteger*)va)->n[((struct BigInteger*)va)->count],
+           ((struct BigInteger*)vb)->n[((struct BigInteger*)vb)->count]);
 
-    //traspasamos "b" a aux
-    for (i = 0; i <= b->count; i++)
-      aux->n[aux->count++] = b->n[i];
-
-    --aux->count;
-
-    pAdd(a, aux);
+  if (sig == 1) 
+    //si b < 0, lo normalizamos
+    ((struct BigInteger*)vb)->n[((struct BigInteger*)vb)->count] *= -1;
+  else if(sig == 10)
+    //si a < 0, lo normalizamos
+    ((struct BigInteger*)va)->n[((struct BigInteger*)va)->count] *= -1;
+  else if (sig == 11) {
+    //a < 0 y b < 0, lo normalizamos
+    ((struct BigInteger*)va)->n[((struct BigInteger*)va)->count] *= -1;
+    ((struct BigInteger*)vb)->n[((struct BigInteger*)vb)->count] *= -1;
   }
 
-  //ajustamos el resultado
-  memcpy(va, a, sizeof(struct BigInteger));
+
+  if (((struct BigInteger*)va)->count == 0) {
+  for (; i <= ((struct BigInteger*)vb)->count; i++)
+    ((struct BigInteger*)va)->n[++((struct BigInteger*)va)->count] = ((struct BigInteger*)vb)->n[i];
+  }else {
+  //limpiamos el BI
+  clean(aux);
+
+  //ponemos tantos 0's como posiciones tenga "a"
+  for (; i <= ((struct BigInteger*)va)->count; i++)
+    aux->n[aux->count++] = 0;
+
+  //traspasamos "b" a aux
+  for (i = 0; i <= ((struct BigInteger*)vb)->count; i++)
+    aux->n[aux->count++] = ((struct BigInteger*)vb)->n[i];
+
+  --aux->count;
+
+  pAdd(va, aux);
+  }
+
+  //una vez movidos los datos recalculamos el signo
+  if(sig == 1 || sig == 11)
+    ((struct BigInteger*)va)->n[((struct BigInteger*)va)->count] *= -1;
 
   //libreamos memoria
-  free(a);
-  free(b);
   free(aux);
 }
 
@@ -1461,27 +1335,12 @@ static void pAppend(void *va, void *vb){
  * Limpia la estructura
  */
 static void clean(void *va){
-  struct BigInteger* a = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-  int i = MAX_LENGTH - 1;
+  int i = 0;
 
-  if (a == NULL)
-    showError(23);
+  for (; i < MAX_LENGTH; i++) 
+    ((struct BigInteger*)va)->n[i] = 0;
 
-  memcpy(a, va, sizeof(struct BigInteger));
-
-  //Si a->count tiene un valor válido
-  if (a->count >= 0 && a->count < MAX_LENGTH)
-    for (; i > a->count; i--)
-      a->n[i] = 0;
-  else
-    for (i = 0; i < MAX_LENGTH; i++)
-      a->n[i] = 0;
-
-  //ajustamos resultado
-  memcpy(va, a, sizeof(struct BigInteger));
-
-  //limpiamos memoria
-  free(a);
+  ((struct BigInteger*)va)->count = 0;
 }
 
 /*
@@ -1493,10 +1352,10 @@ static int signum(int a, int b){
   int ret = 0;
   
   if (a < 0)
-    ret = 10;
+  ret = 10;
 
   if (b < 0)
-    ++ret;
+  ++ret;
 
   return ret;
 }
@@ -1511,23 +1370,37 @@ void validateBI(void* a) {
   int i = 0;
 
   if (t == NULL || a == NULL)
-    showError(98);
+  showError(98);
 
   memcpy(t, (int*)a, sizeof(int));
 
   //validamos la variable de longitud
   if (*t < 0 || *t > MAX_LENGTH)
-    showError(99);
+  showError(99);
 
   memcpy(t, (int*)a + 1, sizeof(int));
 
   //validamos el resto de dígitos, que pueden ser positivos o negativos
   for (; i < MAX_LENGTH; i++) {
-    if (*t < -9 || *t > 9)
-      showError(99);
+  if (*t < -9 || *t > 9)
+    showError(99);
 
+  if(i + 1 < MAX_LENGTH)
     memcpy(t, (int*)a + (i + 1), sizeof(int));
   }
 
   free(t);
+}
+
+/*
+ * Función _free
+ *
+ * Libera masivamente "n" items de memoria
+ */
+void _free(int n, ...) {
+  va_list pa;
+  va_start(pa, n);
+
+  for (; n > 0; n--)
+    free((void*)va_arg(pa, size_t));
 }
