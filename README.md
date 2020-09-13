@@ -85,7 +85,26 @@ This architecture was made during my Degree final paper (TFG, in Spain), to cove
  * v3.11 (Release)
    * Deleted unused variables
  * v4.0 (Major Release)
-   * _Coming soon_
+   * Review for CUDA codification
+     * Changes on all functionalities. We operate directly upon the pointer, saving a bunch of performance (e.g: up to 25'957% on addition operation). Also reduce RAM consumption to 50%.
+     * Additional validations on "nqrt" function
+     * General code cleansing
+     * Review and removal of "showError" codes
+     * Overall, 201 code lines were removed on the optimisation
+   * Bugfix on "validateBI"
+   * Changes on "dvs" to delegate on static function "sDvs"
+   * Changes on "nqrt" to delegate on static funcion "sNqrt"
+   * New function "free" to massive memory free
+   * Bugfix on "toString" with negative numbers
+   * Some variables are changed to static
+   * Deleted "limits.h" library
+   * Component Test performed. Changes derived of it:
+     * Added default value on "BImemcpy": 0
+     * Added a "clean" call on pAppend
+     * Bugfix on "append" with negative numbers
+     * Bugfix on division (0 / 0 = 1)
+     * Bugifx on 0 or below index root
+     * Bugfix on below 0 index power
 
 
 ## How To Configure it?
