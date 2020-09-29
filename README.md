@@ -105,6 +105,9 @@ This architecture was made during my Degree final paper (TFG, in Spain), to cove
      * Bugfix on division (0 / 0 = 1)
      * Bugifx on 0 or below index root
      * Bugfix on below 0 index power
+ * v4.1 (Release)
+   * Bugfix on subtraction when a < b
+   * Added cast to int on strlen
 
 
 ## How To Configure it?
