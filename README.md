@@ -108,6 +108,8 @@ This architecture was made during my Degree final paper (TFG, in Spain), to cove
  * v4.1 (Release)
    * Bugfix on subtraction when a < b
    * Added cast to int on strlen
+ * v4.2 (Release)
+   * Bugfix on "b" when a < b
 
 
 ## How To Configure it?
