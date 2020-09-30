@@ -126,6 +126,8 @@
  *        * Bugfix en potencia de índice negativo
  *    v4.1
  *      - Bugfix en resta cuando a < b
+ *    v4.2
+ *      - Bugfix cuando a < b
  */
 #include "stdio.h"
 #include "stdlib.h"
@@ -134,7 +136,7 @@
 #include "BigInteger.h"
 
 static int MAX_LENGTH = 4096;
-static float BI_VERSION = 4.1f;
+static float BI_VERSION = 4.2f;
 
 /*
  * Función initialize
@@ -242,6 +244,12 @@ static void pAdd(void* va, void* vb) {
   if (sig == 10 || sig == 11)
     //en estos casos, siempre se le va la vuelta al signo
     ((struct BigInteger*)va)->n[((struct BigInteger*)va)->count] *= -1;
+
+  //desnormalizamos b
+  if (sig == 1)
+    ((struct BigInteger*)vb)->n[((struct BigInteger*)vb)->count] *= -1;
+  else if (sig == 11) 
+    ((struct BigInteger*)vb)->n[((struct BigInteger*)vb)->count] *= -1;
 }
 
 /*
@@ -426,6 +434,12 @@ static void pSub(void* va, void* vb) {
     if (sig == 10 || sig == 11)
       //en estos casos, siempre se le va la vuelta al signo
       ((struct BigInteger*)va)->n[((struct BigInteger*)va)->count] *= -1;
+
+    //desnormalizamos b
+    if (sig == 1)
+      ((struct BigInteger*)vb)->n[((struct BigInteger*)vb)->count] *= -1;
+    else if (sig == 11)
+      ((struct BigInteger*)vb)->n[((struct BigInteger*)vb)->count] *= -1;
   }
 
   free(tmp);
@@ -707,6 +721,12 @@ static void sMul(void* va, void* vb) {
   if (sig == 1 || sig == 10)
     ((struct BigInteger*)va)->n[((struct BigInteger*)va)->count] *= -1;
 
+  //desnormalizamos vb
+  if (sig == 1)
+    ((struct BigInteger*)vb)->n[((struct BigInteger*)vb)->count] *= -1;
+  else if (sig == 11) 
+    ((struct BigInteger*)vb)->n[((struct BigInteger*)vb)->count] *= -1;
+
   //liberamos memoria
   _free(5, part, table, zero, one, ret);
 }
@@ -819,6 +839,12 @@ static void sDvs(void* va, void* vb) {
   //si los signos son diferentes, invertimos el signo
   if (sig == 1 || sig == 10)
     ((struct BigInteger*)va)->n[((struct BigInteger*)va)->count] *= -1;
+
+  //desnormalizamos b
+  if (sig == 1)
+    ((struct BigInteger*)vb)->n[((struct BigInteger*)vb)->count] *= -1;
+  else if (sig == 11)
+    ((struct BigInteger*)vb)->n[((struct BigInteger*)vb)->count] *= -1;
 
   //liberamos memoria
   _free(2, temp, one);
