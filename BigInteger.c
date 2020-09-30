@@ -319,7 +319,7 @@ static void addition(void* va, void* vb) {
  * Gestiona el acarreo de la suma. Si hay movimiento de datos, se mueve el valor 1 a ret.
  * De esta manera, podemos llamar hasta que no haya cambios en el acarreo.
  */
-/*static*/ void carryAdd(void* va, int move, int min) {
+static void carryAdd(void* va, int move, int min) {
   int i = 0;
   int acc;
   int limit;
@@ -473,7 +473,7 @@ static void subtract(void* va, void* vb) {
  * Gestiona el acarreo de la resta. Si carryType = 0, el acarreo
  * se gestiona como a = 10 + a; sino, se invierte el signo (excepto al último dígito)
  */
-/*static*/ void carrySub(void* va, int carryType) {
+static void carrySub(void* va, int carryType) {
   int i = 0;
   int acc = 0;
 
