@@ -2,7 +2,7 @@
  * BigInteger.h
  *
  *  Created on: 25 ene. 2019
- *    Author: DoHITB under MIT License
+ *      Author: DoHITB under MIT License
  */
 
 #ifndef BIGINTEGER_H_
@@ -25,15 +25,23 @@ struct BIT{
  */
 static struct BigInteger _ZERO;
 static struct BigInteger _ONE;
+static struct BigInteger _TWO;
+static struct BigInteger _THREE;
+static struct BigInteger _FOUR;
+static struct BigInteger _FIVE;
+static struct BigInteger _SIX;
+static struct BigInteger _SEVEN;
+static struct BigInteger _EIGHT;
+static struct BigInteger _NINE;
 static struct BigInteger _TEN;
 static struct BigInteger _HUND;
 static struct BigInteger _MIN;
 
-static int ini = 0;
-
+//status BImemcpy
+static int ini[13] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
 //Generales
-static void _BI_initialize();
+static void _BI_initialize(int value);
 void BImemcpy(void* dst, int orig);
 void newBI(void *dst, char* s, int sig);
 static void showError(int k);
