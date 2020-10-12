@@ -139,6 +139,8 @@
  *        * Cuando se opera (a * a)
  *        * Cuando se opera (a - a)
  *        * Cuando se opera (a / a)
+ *    v4.5
+ *      - Cambio de carryAdd a función pública
  */
 #include "stdio.h"
 #include "stdlib.h"
@@ -147,7 +149,7 @@
 #include "BigInteger.h"
 
 static int MAX_LENGTH = 4096;
-static float BI_VERSION = 4.4f;
+static float BI_VERSION = 4.5f;
 
 /*
  * Función initialize
@@ -426,7 +428,7 @@ static void addition(void* va, void* vb) {
  * Gestiona el acarreo de la suma. Si hay movimiento de datos, se mueve el valor 1 a ret.
  * De esta manera, podemos llamar hasta que no haya cambios en el acarreo.
  */
-static void carryAdd(void* va, int move, int min) {
+void carryAdd(void* va, int move, int min) {
   int i = 0;
   int acc;
   int limit;
