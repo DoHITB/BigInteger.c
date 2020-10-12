@@ -58,7 +58,7 @@ void _free(int n, ...);
 void add(void* va, void* vb);
 static void pAdd(void* va, void* vb);
 static void addition(void* va, void* vb);
-static void carryAdd(void* va, int move, int min);
+void carryAdd(void* va, int move, int min);
 
 //Resta
 void sub(void* va, void* vb);
