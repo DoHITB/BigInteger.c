@@ -110,6 +110,17 @@ This architecture was made during my Degree final paper (TFG, in Spain), to cove
    * Added cast to int on strlen
  * v4.2 (Release)
    * Bugfix on "b" when a < b
+ * v4.3 (Release)
+   * Bugfix on one-digit division
+   * Bugfix on bipow when va < 0
+ * v4.4 (Release)
+   * New static BI data
+   * Improvement on BI_initialize
+   * Bugfix on same-operator functions
+     * add(a, a)
+     * sub(a, a)
+     * mul(a, a)
+     * dvs(a, a)
 
 
 ## How To Configure it?
@@ -142,6 +153,10 @@ This architecture was made during my Degree final paper (TFG, in Spain), to cove
     * Minus One (_MIN)
     * Zero (_ZERO)
     * One (_ONE)
+    * Two (_TWO)
+    * Three (_THREE)
+    * Four (_FOUR)
+    * ...
     * Ten (_TEN)
     * One Hundred (_HUN)
   * Appending function (append function)
