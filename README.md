@@ -121,6 +121,8 @@ This architecture was made during my Degree final paper (TFG, in Spain), to cove
      * sub(a, a)
      * mul(a, a)
      * dvs(a, a)
+ * v4.5 (Release)
+   * carryAdd is no longer static
 
 
 ## How To Configure it?
