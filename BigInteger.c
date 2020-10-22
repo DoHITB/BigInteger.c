@@ -141,6 +141,8 @@
  *        * Cuando se opera (a / a)
  *    v4.5
  *      - Cambio de carryAdd a función pública
+ *    v4.6
+ *      - Añadimos parámetro k a BigInteger como preparación a la versión 5
  */
 #include "stdio.h"
 #include "stdlib.h"
@@ -149,7 +151,7 @@
 #include "BigInteger.h"
 
 static int MAX_LENGTH = 4096;
-static float BI_VERSION = 4.5f;
+static float BI_VERSION = 4.6f;
 
 /*
  * Función initialize
@@ -297,6 +299,9 @@ void newBI(void* dst, char* s, int sig) {
 
   if (sig == -1)
     ((struct BigInteger*)dst)->n[((struct BigInteger*)dst)->count] *= -1;
+
+  //ajustamos el tipo
+  ((struct BigInteger*)dst)->k = 'i';
 }
 
 /*
@@ -1556,13 +1561,13 @@ void validateBI(void* a) {
   if (t == NULL || a == NULL)
     showError(98);
 
-  memcpy(t, (int*)a, sizeof(int));
+  memcpy(t, (int*)a + 1, sizeof(int));
 
   //validamos la variable de longitud
   if (*t < 0 || *t > MAX_LENGTH)
     showError(99);
 
-  memcpy(t, (int*)a + 1, sizeof(int));
+  memcpy(t, (int*)a + 2, sizeof(int));
 
   //validamos el resto de dígitos, que pueden ser positivos o negativos
   for (; i < MAX_LENGTH; i++) {
@@ -1570,7 +1575,7 @@ void validateBI(void* a) {
       showError(99);
 
     if (i + 1 < MAX_LENGTH)
-      memcpy(t, (int*)a + (i + 1), sizeof(int));
+      memcpy(t, (int*)a + (i + 2), sizeof(int));
   }
 
   free(t);
