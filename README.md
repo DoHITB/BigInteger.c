@@ -123,6 +123,10 @@ This architecture was made during my Degree final paper (TFG, in Spain), to cove
      * dvs(a, a)
  * v4.5 (Release)
    * carryAdd is no longer static
+ * v4.6 (Release)
+   * add new field "k" on BigInteger, as preparation for Major Release BigInteger v5.0
+ * _v5.0 (Major Release)
+   * _Coming Soon
 
 
 ## How To Configure it?
