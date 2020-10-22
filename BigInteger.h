@@ -10,6 +10,7 @@
 
 //struct
 struct BigInteger{
+  char k;
   int count;
   int n[4096];
 };
