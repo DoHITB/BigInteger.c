@@ -143,6 +143,11 @@
  *      - Cambio de carryAdd a función pública
  *    v4.6
  *      - Añadimos parámetro k a BigInteger como preparación a la versión 5
+ *    v.4.7
+ *      - Cambio en la función de validación para mejor rendimiento
+ *      - Eliminar cast en malloc para mejora de rendimiento
+ *      - Bugfix en sNqrt cuando longitud de datos < 0
+ *      - Mejora de rendimiento en clean
  */
 #include "stdio.h"
 #include "stdlib.h"
@@ -151,7 +156,7 @@
 #include "BigInteger.h"
 
 static int MAX_LENGTH = 4096;
-static float BI_VERSION = 4.6f;
+static float BI_VERSION = 4.7f;
 
 /*
  * Función initialize
@@ -159,9 +164,17 @@ static float BI_VERSION = 4.6f;
  * Da valores a ciertos datos útiles.
  */
 static void _BI_initialize(int value) {
+  int i = 0;
+
   if (value == 0) {
-    if(ini[0] == 0)
-      newBI(&_ZERO, "0", 0);
+    if (ini[0] == 0) {
+      //lo creamos manualmente ya que clean copia de _ZERO
+      for (; i < MAX_LENGTH; i++)
+        _ZERO.n[i] = 0;
+
+      _ZERO.count = 0;
+      _ZERO.k = 'i';
+    }
 
     ini[0] = 1;
   }else if (value == 1) {
@@ -314,7 +327,7 @@ void newBI(void* dst, char* s, int sig) {
 static void pAdd(void* va, void* vb) {
   if (va == vb) {
     //add(a, a);
-    struct BigInteger* vt = (struct BigInteger*)malloc(sizeof(struct BigInteger));
+    struct BigInteger* vt = malloc(sizeof(struct BigInteger));
     BImemcpy(vt, 2);
 
     //delegamos en mul para hacer a = a * 2
@@ -495,7 +508,7 @@ void carryAdd(void* va, int move, int min) {
 static void pSub(void* va, void* vb) {
   int sig;
   int comp;
-  struct BigInteger* tmp = (struct BigInteger*)malloc(sizeof(struct BigInteger));
+  struct BigInteger* tmp = malloc(sizeof(struct BigInteger));
 
   if (tmp == NULL)
     showError(10);
@@ -503,7 +516,7 @@ static void pSub(void* va, void* vb) {
   if (va == vb) {
     //sub(a, a);
     BImemcpy(va, 0);
-  }else {
+  } else {
     //sub(a, b)
     hardEquals(va, vb, &comp);
     sig = signum(((struct BigInteger*)va)->n[((struct BigInteger*)va)->count],
@@ -523,8 +536,7 @@ static void pSub(void* va, void* vb) {
 
       //rescatamos el valor original de vb
       memcpy(vb, tmp, sizeof(struct BigInteger));
-    }
-    else if (comp == 0)
+    } else if (comp == 0)
       BImemcpy(va, 0);
     else {
       //normalizamos los signos
@@ -613,10 +625,10 @@ static void carrySub(void* va, int carryType) {
         //normalizamos el número
         ((struct BigInteger*)va)->n[i] += 10;
         acc = 1;
-      }else
+      } else
         acc = 0;
     }
-  }else {
+  } else {
     //en esta opción, no es necesario pasar una segunda vez por acarreos.
     for (i = 0; i < ((struct BigInteger*)va)->count; i++)
       if (((struct BigInteger*)va)->n[i] < 0)
@@ -723,12 +735,12 @@ static void hardEquals(void* va, void* vb, int* ret) {
 static void sMul(void* va, void* vb) {
   int sig;
   int i = 0;
-  struct BigInteger* part = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-  struct BigInteger* ret = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-  struct BIT* table = (struct BIT*)malloc(sizeof(struct BIT));
-  struct BigInteger* zero = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-  struct BigInteger* one = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-  struct BigInteger* tmp = (struct BigInteger*)malloc(sizeof(struct BigInteger));
+  struct BigInteger* part = malloc(sizeof(struct BigInteger));
+  struct BigInteger* ret =  malloc(sizeof(struct BigInteger));
+  struct BIT* table = malloc(sizeof(struct BIT));
+  struct BigInteger* zero = malloc(sizeof(struct BigInteger));
+  struct BigInteger* one =  malloc(sizeof(struct BigInteger));
+  struct BigInteger* tmp =  malloc(sizeof(struct BigInteger));
   int x;
   int comp;
   int calc = 0;
@@ -742,8 +754,7 @@ static void sMul(void* va, void* vb) {
     memcpy(tmp, va, sizeof(struct BigInteger));
 
     sMul(va, tmp);
-  }
-  else {
+  } else {
     //mul(a, b)
     BImemcpy(zero, 0);
     BImemcpy(ret, 0);
@@ -823,8 +834,7 @@ static void sMul(void* va, void* vb) {
           memcpy(&table->BI[((struct BigInteger*)vb)->n[i]], part, sizeof(struct BigInteger));
           //table->status[b->n[i]] = 1;
           table->status[((struct BigInteger*)vb)->n[i]] = 1;
-        }
-        else
+        } else
           //tenemos el resultado
           memcpy(part, &table->BI[((struct BigInteger*)vb)->n[i]], sizeof(struct BigInteger));
 
@@ -914,8 +924,8 @@ void dvs(void* va, void* vb) {
  * Simula la operación a = a / b
  */
 static void sDvs(void* va, void* vb) {
-  struct BigInteger* temp = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-  struct BigInteger* one = (struct BigInteger*)malloc(sizeof(struct BigInteger));
+  struct BigInteger* temp = malloc(sizeof(struct BigInteger));
+  struct BigInteger* one =  malloc(sizeof(struct BigInteger));
   int sig;
   int comp;
 
@@ -925,7 +935,7 @@ static void sDvs(void* va, void* vb) {
   if (va == vb) {
     //dvs(a, a)
     BImemcpy(va, 1);
-  }else {
+  } else {
     //dvs(a, b)
 
     BImemcpy(temp, 0);
@@ -956,8 +966,7 @@ static void sDvs(void* va, void* vb) {
       else
         //en caso contrario, retornamos 1
         memcpy(va, one, sizeof(struct BigInteger));
-    }
-    else if (comp == 2)
+    } else if (comp == 2)
       //si a < b, a / b = 0
       memcpy(va, temp, sizeof(struct BigInteger));
     else if (comp == 1) {
@@ -989,11 +998,11 @@ static void sDvs(void* va, void* vb) {
  * Realiza la división utilizando el teorema de Bolzano
  */
 static void divide(void* va, void* vb) {
-  struct BIT* table = (struct BIT*)malloc(sizeof(struct BIT));
-  struct BigInteger* dTemp = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-  struct BigInteger* ret = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-  struct BigInteger* temp = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-  struct BigInteger* biTemp = (struct BigInteger*)malloc(sizeof(struct BigInteger));
+  struct BIT* table = malloc(sizeof(struct BIT));
+  struct BigInteger* dTemp =  malloc(sizeof(struct BigInteger));
+  struct BigInteger* ret =    malloc(sizeof(struct BigInteger));
+  struct BigInteger* temp =   malloc(sizeof(struct BigInteger));
+  struct BigInteger* biTemp = malloc(sizeof(struct BigInteger));
   int len;
   int i = 0;
   int x = 0;
@@ -1085,7 +1094,7 @@ static void divide(void* va, void* vb) {
           memcpy(&table->BI[++currentBIT], biTemp, sizeof(struct BigInteger));
           table->status[currentBIT] = 1;
           added = 1;
-        }else
+        } else
           added = 0;
 
         //validamos si nos sirve
@@ -1123,7 +1132,7 @@ static void divide(void* va, void* vb) {
           //si dTemp = temp
           res = x;
           x = -99;
-        }else if (eq == 1) {
+        } else if (eq == 1) {
           //si dTemp > max, según el teorema de Bolzano, hemos pasado por dTemp = max, 
           //por tanto, el valor correcto es el siguiente
           res = x;
@@ -1171,10 +1180,10 @@ void nqrt(void* va, int n) {
  * Realiza la raíz enésima de a.
  */
 static void sNqrt(void* va, int n) {
-  struct BigInteger* ret = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-  struct BigInteger* raw = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-  struct BigInteger* base = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-  struct BigInteger* zero = (struct BigInteger*)malloc(sizeof(struct BigInteger));
+  struct BigInteger* ret =  malloc(sizeof(struct BigInteger));
+  struct BigInteger* raw =  malloc(sizeof(struct BigInteger));
+  struct BigInteger* base = malloc(sizeof(struct BigInteger));
+  struct BigInteger* zero = malloc(sizeof(struct BigInteger));
   int lmax = 0;
   int isEq = 0;
 
@@ -1224,17 +1233,23 @@ static void sNqrt(void* va, int n) {
 
       base->n[lmax] = 0;
       --lmax;
-      base->n[lmax] = 1;
-      --base->count;
 
-      //calculamos la potencia y comparamos (siempre será a < ret, ya que si fuera a = ret no hubiera entrado).
-      hardEquals(base, zero, &isEq);
+      if (lmax >= 0) {
+        //si lmax es mayor que 0, aún tenemos dígitos para pivotar
+        base->n[lmax] = 1;
+        --base->count;
 
-      //si base > 0, aún hay que iterar
-      if (isEq == 1)
-        isEq = 2;
-      else
-        //en caso contrario, hemos llegado a la máxima aproximación posible
+        //calculamos la potencia y comparamos (siempre será a < ret, ya que si fuera a = ret no hubiera entrado).
+        hardEquals(base, zero, &isEq);
+
+        //si base > 0, aún hay que iterar
+        if (isEq == 1)
+          isEq = 2;
+        else
+          //en caso contrario, hemos llegado a la máxima aproximación posible
+          isEq = 0;
+      } else
+        //si lmax es inferior a 0, hemos llegado a la máxima aproximación posible
         isEq = 0;
     }
   }
@@ -1270,8 +1285,8 @@ void bipow(void* va, int p) {
  * Simula la operación a = a^p
  */
 static void sBipow(void* va, int p) {
-  struct BigInteger* res = (struct BigInteger*)malloc(sizeof(struct BigInteger));
-  struct BigInteger* tmp = (struct BigInteger*)malloc(sizeof(struct BigInteger));
+  struct BigInteger* res = malloc(sizeof(struct BigInteger));
+  struct BigInteger* tmp = malloc(sizeof(struct BigInteger));
   int d2b[10];
   int d2bi = 0;
   int x = 0;
@@ -1399,7 +1414,7 @@ static void showError(int k) {
  * Reserva memoria para un char, para usarlo en toString.
  */
 void iniStr(char** dst) {
-  *dst = (char*)malloc(sizeof(char) * MAX_LENGTH);
+  *dst = malloc(sizeof(char) * MAX_LENGTH);
 }
 
 /*
@@ -1457,7 +1472,7 @@ void append(void* va, void* vb) {
  * a = 2 y b = 1 (ya que los array de BigInteger van al revés.
  */
 static void pAppend(void* va, void* vb) {
-  struct BigInteger* aux = (struct BigInteger*)malloc(sizeof(struct BigInteger));
+  struct BigInteger* aux = malloc(sizeof(struct BigInteger));
   int i = 0;
   int sig;
 
@@ -1493,7 +1508,7 @@ static void pAppend(void* va, void* vb) {
   if (((struct BigInteger*)va)->count == 0) {
     for (; i <= ((struct BigInteger*)vb)->count; i++)
       ((struct BigInteger*)va)->n[++((struct BigInteger*)va)->count] = ((struct BigInteger*)vb)->n[i];
-  }else {
+  } else {
     //limpiamos el BI
     clean(aux);
 
@@ -1524,12 +1539,7 @@ static void pAppend(void* va, void* vb) {
  * Limpia la estructura
  */
 static void clean(void* va) {
-  int i = 0;
-
-  for (; i < MAX_LENGTH; i++)
-    ((struct BigInteger*)va)->n[i] = 0;
-
-  ((struct BigInteger*)va)->count = 0;
+  BImemcpy(va, 0);
 }
 
 /*
@@ -1555,30 +1565,21 @@ static int signum(int a, int b) {
  * Valida que todos los datos del BI sean coherentes
  */
 void validateBI(void* a) {
-  int* t = (int*)(malloc(sizeof(int)));
   int i = 0;
 
-  if (t == NULL || a == NULL)
-    showError(98);
-
-  memcpy(t, (int*)a + 1, sizeof(int));
-
-  //validamos la variable de longitud
-  if (*t < 0 || *t > MAX_LENGTH)
+  //validamos el tipo
+  if (((struct BigInteger*)a)->k != 'i')
     showError(99);
 
-  memcpy(t, (int*)a + 2, sizeof(int));
+  //validamos la longitud
+  if (((struct BigInteger*)a)->count < 0 || ((struct BigInteger*)a)->count > MAX_LENGTH)
+    showError(99);
 
   //validamos el resto de dígitos, que pueden ser positivos o negativos
   for (; i < MAX_LENGTH; i++) {
-    if (*t < -9 || *t > 9)
+    if (((struct BigInteger*)a)->n[i] < -9 || ((struct BigInteger*)a)->n[i] > 9)
       showError(99);
-
-    if (i + 1 < MAX_LENGTH)
-      memcpy(t, (int*)a + (i + 2), sizeof(int));
   }
-
-  free(t);
 }
 
 /* 
