@@ -125,6 +125,11 @@ This architecture was made during my Degree final paper (TFG, in Spain), to cove
    * carryAdd is no longer static
  * v4.6 (Release)
    * add new field "k" on BigInteger, as preparation for Major Release BigInteger v5.0
+ * v4.7 (Release)
+   * "validateBI" changes to improve performance
+   * Deleted cast on malloc to imporve performance
+   * Bugfix on sNqrt when data lenght < 0
+   * Performance improvement on clean function
  * _v5.0 (Major Release)
    * _Coming Soon
 
