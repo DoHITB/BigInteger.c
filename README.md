@@ -130,6 +130,9 @@ This architecture was made during my Degree final paper (TFG, in Spain), to cove
    * Deleted cast on malloc to imporve performance
    * Bugfix on sNqrt when data lenght < 0
    * Performance improvement on clean function
+ * v4.71 (Release)
+   * Added function iniBIT to allocate BIT memory
+   * Now multiplication and division works with external BIT to increase performance
  * _v5.0 (Major Release)
    * _Coming Soon
 
