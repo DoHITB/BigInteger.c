@@ -148,6 +148,9 @@
  *      - Eliminar cast en malloc para mejora de rendimiento
  *      - Bugfix en sNqrt cuando longitud de datos < 0
  *      - Mejora de rendimiento en clean
+ *    v.4.71
+ *      - Añadida función iniBIT para crear estructuras BIT y mejorar rendimiento.
+ *      - La multiplicación y la división ahora funcionan con un BIT externo
  */
 #include "stdio.h"
 #include "stdlib.h"
@@ -156,7 +159,7 @@
 #include "BigInteger.h"
 
 static int MAX_LENGTH = 4096;
-static float BI_VERSION = 4.7f;
+static float BI_VERSION = 4.71f;
 
 /*
  * Función initialize
@@ -732,12 +735,11 @@ static void hardEquals(void* va, void* vb, int* ret) {
  *
  * Simula la operación a = a * b
  */
-static void sMul(void* va, void* vb) {
+static void sMul(void* va, void* vb, void* table) {
   int sig;
   int i = 0;
   struct BigInteger* part = malloc(sizeof(struct BigInteger));
   struct BigInteger* ret =  malloc(sizeof(struct BigInteger));
-  struct BIT* table = malloc(sizeof(struct BIT));
   struct BigInteger* zero = malloc(sizeof(struct BigInteger));
   struct BigInteger* one =  malloc(sizeof(struct BigInteger));
   struct BigInteger* tmp =  malloc(sizeof(struct BigInteger));
@@ -753,7 +755,7 @@ static void sMul(void* va, void* vb) {
     //copiamos a a tmp para poder trabajar sin colapsar datos
     memcpy(tmp, va, sizeof(struct BigInteger));
 
-    sMul(va, tmp);
+    sMul(va, tmp, table);
   } else {
     //mul(a, b)
     BImemcpy(zero, 0);
@@ -802,26 +804,26 @@ static void sMul(void* va, void* vb) {
       calc = 1;
 
     //inicializamos BIT
-    memcpy(&table->BI[0], zero, sizeof(struct BigInteger));
-    memcpy(&table->BI[1], va, sizeof(struct BigInteger));
+    memcpy(&((struct BIT*)table)->BI[0], zero, sizeof(struct BigInteger));
+    memcpy(&((struct BIT*)table)->BI[1], va, sizeof(struct BigInteger));
 
-    table->status[0] = 1;
-    table->status[1] = 1;
-    table->status[2] = 0;
-    table->status[3] = 0;
-    table->status[4] = 0;
-    table->status[5] = 0;
-    table->status[6] = 0;
-    table->status[7] = 0;
-    table->status[8] = 0;
-    table->status[9] = 0;
+    ((struct BIT*)table)->status[0] = 1;
+    ((struct BIT*)table)->status[1] = 1;
+    ((struct BIT*)table)->status[2] = 0;
+    ((struct BIT*)table)->status[3] = 0;
+    ((struct BIT*)table)->status[4] = 0;
+    ((struct BIT*)table)->status[5] = 0;
+    ((struct BIT*)table)->status[6] = 0;
+    ((struct BIT*)table)->status[7] = 0;
+    ((struct BIT*)table)->status[8] = 0;
+    ((struct BIT*)table)->status[9] = 0;
 
     //si el número no está ya calculado, lo calculamos
     if (calc == 0) {
       //realizamos los productos parciales
       for (i = 0; i <= ((struct BigInteger*)vb)->count; i++) {
         //validamos si BIT[n] existe
-        if (table->status[((struct BigInteger*)vb)->n[i]] == 0) {
+        if (((struct BIT*)table)->status[((struct BigInteger*)vb)->n[i]] == 0) {
           clean(part);
           //no tenemos el resultado. Calculamos el valor
           for (x = 0; x <= ((struct BigInteger*)va)->count; x++)
@@ -831,12 +833,12 @@ static void sMul(void* va, void* vb) {
           carryAdd(part, 0, 0);
 
           //movemos el valor a BIT
-          memcpy(&table->BI[((struct BigInteger*)vb)->n[i]], part, sizeof(struct BigInteger));
+          memcpy(&((struct BIT*)table)->BI[((struct BigInteger*)vb)->n[i]], part, sizeof(struct BigInteger));
           //table->status[b->n[i]] = 1;
-          table->status[((struct BigInteger*)vb)->n[i]] = 1;
+          ((struct BIT*)table)->status[((struct BigInteger*)vb)->n[i]] = 1;
         } else
           //tenemos el resultado
-          memcpy(part, &table->BI[((struct BigInteger*)vb)->n[i]], sizeof(struct BigInteger));
+          memcpy(part, &((struct BIT*)table)->BI[((struct BigInteger*)vb)->n[i]], sizeof(struct BigInteger));
 
         //multiplicación parcial
         pMul(i, part);
@@ -863,7 +865,7 @@ static void sMul(void* va, void* vb) {
   }
 
   //liberamos memoria
-  _free(6, part, table, zero, one, ret, tmp);
+  _free(5, part, zero, one, ret, tmp);
 }
 
 /*
@@ -877,7 +879,7 @@ void mul(void* va, void* vb) {
   validateBI(vb);
 
   //delegamos en la función estática
-  sMul(va, vb);
+  sMul(va, vb, biBIT);
 }
 
 /*
@@ -974,7 +976,7 @@ static void sDvs(void* va, void* vb) {
       hardEquals(vb, one, &comp);
 
       if (comp != 0)
-        divide(va, vb);
+        divide(va, vb, biBIT);
     }
 
     //si los signos son diferentes, invertimos el signo
@@ -997,8 +999,7 @@ static void sDvs(void* va, void* vb) {
  *
  * Realiza la división utilizando el teorema de Bolzano
  */
-static void divide(void* va, void* vb) {
-  struct BIT* table = malloc(sizeof(struct BIT));
+static void divide(void* va, void* vb, void* table) {
   struct BigInteger* dTemp =  malloc(sizeof(struct BigInteger));
   struct BigInteger* ret =    malloc(sizeof(struct BigInteger));
   struct BigInteger* temp =   malloc(sizeof(struct BigInteger));
@@ -1022,19 +1023,19 @@ static void divide(void* va, void* vb) {
   dTemp->count = 0;
 
   //llenamos BIT
-  BImemcpy(&table->BI[0], 0);
-  memcpy(&table->BI[1], vb, sizeof(struct BigInteger));
+  BImemcpy(&((struct BIT*)table)->BI[0], 0);
+  memcpy(&((struct BIT*)table)->BI[1], vb, sizeof(struct BigInteger));
 
-  table->status[0] = 1;
-  table->status[1] = 1;
-  table->status[2] = 0;
-  table->status[3] = 0;
-  table->status[4] = 0;
-  table->status[5] = 0;
-  table->status[6] = 0;
-  table->status[7] = 0;
-  table->status[8] = 0;
-  table->status[9] = 0;
+  ((struct BIT*)table)->status[0] = 1;
+  ((struct BIT*)table)->status[1] = 1;
+  ((struct BIT*)table)->status[2] = 0;
+  ((struct BIT*)table)->status[3] = 0;
+  ((struct BIT*)table)->status[4] = 0;
+  ((struct BIT*)table)->status[5] = 0;
+  ((struct BIT*)table)->status[6] = 0;
+  ((struct BIT*)table)->status[7] = 0;
+  ((struct BIT*)table)->status[8] = 0;
+  ((struct BIT*)table)->status[9] = 0;
 
   currentBIT = 1;
 
@@ -1074,7 +1075,7 @@ static void divide(void* va, void* vb) {
     memcpy(dTemp, temp, sizeof(struct BigInteger));
 
     //Retorna 0 si son iguales, retorna 1 si a > b, retorna 2 si a < b.
-    hardEquals(dTemp, &table->BI[currentBIT], &eq);
+    hardEquals(dTemp, &((struct BIT*)table)->BI[currentBIT], &eq);
 
     x = currentBIT;
 
@@ -1082,7 +1083,7 @@ static void divide(void* va, void* vb) {
       //si dTemp > max, partimos de ese valor y hasta el máximo.
 
       //recuperamos el último BI
-      memcpy(biTemp, &table->BI[x], sizeof(struct BigInteger));
+      memcpy(biTemp, &((struct BIT*)table)->BI[x], sizeof(struct BigInteger));
       added = 0;
 
       for (; x < 10; x++) {
@@ -1091,8 +1092,8 @@ static void divide(void* va, void* vb) {
 
         //lo añadimos a BIT, si no hemos llenado la tabla (rellenamos siempre por adelantado)
         if (currentBIT < 9) {
-          memcpy(&table->BI[++currentBIT], biTemp, sizeof(struct BigInteger));
-          table->status[currentBIT] = 1;
+          memcpy(&((struct BIT*)table)->BI[++currentBIT], biTemp, sizeof(struct BigInteger));
+          ((struct BIT*)table)->status[currentBIT] = 1;
           added = 1;
         } else
           added = 0;
@@ -1126,7 +1127,7 @@ static void divide(void* va, void* vb) {
 
       for (; x >= 0; x--) {
         //validamos si nos sirve
-        hardEquals(dTemp, &table->BI[x], &eq);
+        hardEquals(dTemp, &((struct BIT*)table)->BI[x], &eq);
 
         if (eq == 0) {
           //si dTemp = temp
@@ -1144,7 +1145,7 @@ static void divide(void* va, void* vb) {
     ret->n[len - i] = res;
 
     //restamos
-    pSub(dTemp, &table->BI[res]);
+    pSub(dTemp, &((struct BIT*)table)->BI[res]);
   }
 
   ret->count = mLen;
@@ -1158,7 +1159,7 @@ static void divide(void* va, void* vb) {
     ++((struct BigInteger*)va)->count;
 
   //liberamos memoria
-  _free(5, table, dTemp, ret, temp, biTemp);
+  _free(4, dTemp, ret, temp, biTemp);
 }
 
 /*
@@ -1355,10 +1356,10 @@ static void sBipow(void* va, int p) {
     if (i == 0)
       memcpy(tmp, va, sizeof(struct BigInteger));
     else
-      sMul(tmp, tmp);
+      sMul(tmp, tmp, biBIT);
 
     if (d2b[i] == 1)
-      sMul(res, tmp);
+      sMul(res, tmp, biBIT);
   }
 
   //revertimos va si el exponente es impar
@@ -1415,6 +1416,19 @@ static void showError(int k) {
  */
 void iniStr(char** dst) {
   *dst = malloc(sizeof(char) * MAX_LENGTH);
+}
+
+/*
+ * Función iniBIT.
+ *
+ * Reserva memoria para un BIT, para usarlo en toString.
+ */
+void iniBIT() {
+  if (ibit == 0) {
+    //inicializamos el BIT interno
+    biBIT = malloc(sizeof(struct BIT));
+    ibit = 1;
+  }
 }
 
 /*
