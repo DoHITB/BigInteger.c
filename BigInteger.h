@@ -38,6 +38,9 @@ static struct BigInteger _TEN;
 static struct BigInteger _HUND;
 static struct BigInteger _MIN;
 
+static struct BIT* biBIT;
+static int ibit = 0;
+
 //status BImemcpy
 static int ini[13] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
@@ -53,6 +56,7 @@ static void clean(void *va);
 static int signum(int a, int b);
 void validateBI(void* a);
 void iniStr(char** dst);
+void iniBIT();
 void _free(int n, ...);
 
 //Suma
@@ -72,13 +76,13 @@ void equals(void* va, void* vb, int* ret);
 
 //Multiplicación
 void mul(void *va, void *vb);
-static void sMul(void* va, void* vb);
+static void sMul(void* va, void* vb, void* table);
 static void pMul(int pos, void *vpart);
 
 //División
 void dvs(void *va, void *vb);
 static void sDvs(void* va, void* vb);
-static void divide(void *va, void *vb);
+static void divide(void *va, void *vb, void* table);
 
 //Raíz Cuadrada
 void nqrt(void* va, int n);
