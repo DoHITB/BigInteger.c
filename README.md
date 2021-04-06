@@ -219,3 +219,6 @@ I have full documentation about CUDA possible implementation, and some fun facts
 
 ## What's Next?
 There is a plan for several releases, that will be ongoing on further months.
+
+* Make "nqrt" and "bipow" works on non-integer data
+* Make "operate" functionality works (pending unit test)
