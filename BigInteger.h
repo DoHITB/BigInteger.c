@@ -4,92 +4,145 @@
  *  Created on: 25 ene. 2019
  *      Author: DoHITB under MIT License
  */
-
 #ifndef BIGINTEGER_H_
 #define BIGINTEGER_H_
 
+static int MAX_LENGTH = 
+#ifdef C_MAX_LENGTH
+  C_MAX_LENGTH;
+#else
+  4096;
+#endif
+
 //struct
-struct BigInteger{
+typedef struct BigInteger {
   char k;
   int count;
-  int n[4096];
-};
+  char n[
+#ifdef C_MAX_LENGTH
+    C_MAX_LENGTH
+#else
+    4096
+#endif
+  ];
+} BigInteger;
 
 //BIT, Buffer para multiplicación y división
-struct BIT{
+typedef struct BIT{
   struct BigInteger BI[10];
   int status[10];
-};
+} BIT;
+
+//variables de trabajo
+#if BI_STANDALONE == 1
+typedef struct memory {
+  //add
+  void* vt;
+
+  //sub
+  void* stmp;
+
+  //mul
+  void* mpart;
+  void* mret;
+  void* mzero;
+  void* mone;
+  void* mtmp;
+
+  //dvs
+  void* done;
+  void* dtmp;
+  void* dret;
+  void* dTemp;
+  void* biTemp;
+
+  //nqrt
+  void* sret;
+  void* sraw;
+  void* sbase;
+  void* szero;
+
+  //bipow
+  void* bres;
+  void* btmp;
+
+  //append
+  void* aaux;
+
+  //BIT
+  void* biBIT;
+} memory;
+#endif
 
 /*
  * Variables útiles
  */
-static struct BigInteger _ZERO;
-static struct BigInteger _ONE;
-static struct BigInteger _TWO;
-static struct BigInteger _THREE;
-static struct BigInteger _FOUR;
-static struct BigInteger _FIVE;
-static struct BigInteger _SIX;
-static struct BigInteger _SEVEN;
-static struct BigInteger _EIGHT;
-static struct BigInteger _NINE;
-static struct BigInteger _TEN;
-static struct BigInteger _HUND;
-static struct BigInteger _MIN;
+static BigInteger _ZERO;
+static BigInteger _ONE;
+static BigInteger _TWO;
+static BigInteger _THREE;
+static BigInteger _FOUR;
+static BigInteger _FIVE;
+static BigInteger _SIX;
+static BigInteger _SEVEN;
+static BigInteger _EIGHT;
+static BigInteger _NINE;
+static BigInteger _TEN;
+static BigInteger _HUND;
+static BigInteger _MIN;
 
-static struct BIT* biBIT;
-static int ibit = 0;
-
-//status BImemcpy
-static int ini[13] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+//Baliza para división con double
+static int BI_point;
 
 //Generales
-static void _BI_initialize(int value);
+void _BI_initialize();
 void BImemcpy(void* dst, int orig);
 void newBI(void *dst, char* s, int sig);
-static void showError(int k);
-void toString(void *vb, char* dst);
-void append(void *va, void *vb);
-static void pAppend(void *va, void *vb);
-static void clean(void *va);
+static void pAppend(void* va, int b);
 static int signum(int a, int b);
 void validateBI(void* a);
-void iniStr(char** dst);
-void iniBIT();
-void _free(int n, ...);
+void hardEquals(void* va, void* vb, int* ret);
+int getPoint();
 
 //Suma
-void add(void* va, void* vb);
-static void pAdd(void* va, void* vb);
+void pAdd(void* va, void* vb, void* m);
 static void addition(void* va, void* vb);
 void carryAdd(void* va, int move, int min);
 
 //Resta
-void sub(void* va, void* vb);
-static void pSub(void* va, void* vb);
+void pSub(void* va, void* vb, void* m);
 static void subtract(void *va, void *vb);
 static void carrySub(void* va, int carryType);
 static void recount(void *va);
-static void hardEquals(void *va, void *vb, int *ret);
-void equals(void* va, void* vb, int* ret);
 
 //Multiplicación
-void mul(void *va, void *vb);
-static void sMul(void* va, void* vb, void* table);
+void sMul(void* va, void* vb, void* m);
 static void pMul(int pos, void *vpart);
 
 //División
-void dvs(void *va, void *vb);
-static void sDvs(void* va, void* vb);
-static void divide(void *va, void *vb, void* table);
+void sDvs(void* va, void* vb, void* m);
+static void divide(void *va, void *vb, void* m);
 
 //Raíz Cuadrada
-void nqrt(void* va, int n);
-static void sNqrt(void* va, int n);
+void sNqrt(void* va, int n, void* m);
 
 //Potencia
-void bipow(void *va, int p);
-static void sBipow(void* va, int p);
+void sBipow(void* va, int p, void* m);
 
+//Standalone
+#if BI_STANDALONE == 1 
+void add(void* va, void* vb, void* m);
+void sub(void* va, void* vb, void* m);
+void mul(void *va, void *vb, void* m);
+void dvs(void *va, void *vb, void* m);
+void nqrt(void* va, int n, void* m);
+void bipow(void *va, int p, void* m);
+static void showError(int k);
+void toString(void *vb, char* dst);
+void clean(void *va);
+void equals(void* va, void* vb, void* m, int* ret);
+void iniStr(char** dst);
+void init(void** m);
+size_t getMemorySize();
+#endif
 #endif /* BIGINTEGER_H_ */
