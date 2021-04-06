@@ -1,7 +1,7 @@
 # BigInteger.c
 C Based model to work with Big Integers
 
-Correctly tested working with up to 4096 digits integer (on the master branch).
+Correctly tested working with up to 4096 digits integer and double (on the master branch).
 
 This architecture was made during my Degree final paper (TFG, in Spain), to cover an RSA cryptoanalsys.
 
@@ -14,134 +14,163 @@ This architecture was made during my Degree final paper (TFG, in Spain), to cove
    * New function "BImemcpy" to retreive useful values of BigInteger.
    * New function "validateBI" to validate the internal structure of a BI void pointer.
  * v1.11 (beta)
-   * Added memory cleansing before "return" statements
+   * Added memory cleansing before "return" statements.
  * v1.2 (beta)
-   * Added new behaviour for better performance on "pow" function
+   * Added new behaviour for better performance on "pow" function.
  * v1.3 (beta)
-   * Patch to avoid memory leackage
-   * Deleted "time.h" library (unnecesary)
+   * Patch to avoid memory leackage.
+   * Deleted "time.h" library (unnecesary).
  * v1.4 (beta)
    * Changed "BIQSRT" function for "nqrt", that makes "n-root"
-   * Delete "static" from BIT (unnecesary)
+   * Delete "static" from BIT (unnecesary).
    * Created wrapper function for "add" ,"sub", and "mul" for internal use.
-   * Arranged header variable names to naming convention
+   * Arranged header variable names to naming convention.
    * Function "signum" modified to increase performance. It now works with two int.
      * 90,566% memory usage reduction on nqrt via wrappers.
      * 53,656% performance increase on nqrt via wrappers.
-     * (nqrt is used to measurement as nqrt -> pow -> mul -> pmul -> add is the longest function chain available)
+     * (nqrt is used to measurement as nqrt -> pow -> mul -> pmul -> add is the longest function chain available).
  * v1.5 (beta)
-   * Changes on toString function to move data to char* instead of printing
+   * Changes on toString function to move data to char* instead of printing.
  * v1.6 (beta)
-   * Bugfix on validateBI on negative numbers
-   * Bugfix on toString on negative numbers
+   * Bugfix on validateBI on negative numbers.
+   * Bugfix on toString on negative numbers.
  * v2.0 (Release)
-   * SIT (324 diferent operations) done. Fixes done
-     * Remove validateBI from pSub
-     * Bugfix on add if b < 0 and |a| < |b|
-     * Bugfix on add if |a| < |b| and a, b < 0
-     * Bugfix on division if a / b, b < 0
+   * SIT (324 diferent operations) done. Fixes done.
+     * Remove validateBI from pSub.
+     * Bugfix on add if b < 0 and |a| < |b|.
+     * Bugfix on add if |a| < |b| and a, b < 0.
+     * Bugfix on division if a / b, b < 0.
    * Code cleansing
  * v2.1 (Release)
-   * Bugfix on "division" function
+   * Bugfix on "division" function.
  * v2.2 (Release)
    * Bugfix on "validateBI" function. Avoid "t" data leackage.
  * v2.3 (Release)
    * Naming change on "pow" function. Now it's called "bipow" to avoid internal errors.
  * v2.4 (Release)
-   * Bugfix on division when len(a) - len(b) = 1
+   * Bugfix on division when len(a) - len(b) = 1.
  * v2.5 (Release)
-   * Change on "nqrt" function for performance improvement. Root calculation via Bolzano
+   * Change on "nqrt" function for performance improvement. Root calculation via Bolzano.
  * v2.51 (Release)
-   * Bugfix on "validateBI"
+   * Bugfix on "validateBI".
  * v3.0 (Major Release)
-   * Deleted unnecesary commented lines
-   * Changed the signature of "subtraction" for "subtract(a, b)"
-   * Deleted function "rev" (unnecesary)
-   * Deleted "min" variable from multiplication
-   * Deleted "a = -1" and "b = -1" validation on multiplication (unnecesary)
-   * Added length on "pMul" function to avoid heap overflow
+   * Deleted unnecesary commented lines.
+   * Changed the signature of "subtraction" for "subtract(a, b)".
+   * Deleted function "rev" (unnecesary).
+   * Deleted "min" variable from multiplication.
+   * Deleted "a = -1" and "b = -1" validation on multiplication (unnecesary).
+   * Added length on "pMul" function to avoid heap overflow.
    * Change on "sMul" function. Instead of doing all the products and then all the add, now it make product-addition loop. This way, there are less memory consumption and better performance.
-   * Change on "carryAdd" function. Deleted "Do/While" loop (unncesary)
-   * Deleted function "makeBase" (unnecesary)
-   * Deleted function "shift" (unnecesary)
-   * New function iniStr. It allocate memory for "toString" function
-   * General code cleansing
+   * Change on "carryAdd" function. Deleted "Do/While" loop (unncesary).
+   * Deleted function "makeBase" (unnecesary).
+   * Deleted function "shift" (unnecesary).
+   * New function iniStr. It allocate memory for "toString" function.
+   * General code cleansing.
  * v3.01 (Release)
    * Deleted "Do/While" loop on "carrySub" function.
  * v3.02 (Release)
    * Optimization on "carryAdd" function. Carry is made in two times.
-     * Common part: it's all carried
-     * Non-common part: it's carried unti acc = 0
-     * 3.448% performance increase tested with 10.000 additions of 100 digit numbers
+     * Common part: it's all carried.
+     * Non-common part: it's carried unti acc = 0.
+     * 3.448% performance increase tested with 10.000 additions of 100 digit numbers.
  * v3.1 (Release)
-   * Function "nqrt" modified
-     * Change on "add" calls by "pAdd"
-     * Change on "equals" calls by "hardEquals"
-     * Change on "sub" calls by "pSub"
-     * Change on "bipow" calls by "sBipow"
-     * Performance increase of 38'758% based on 10.000 nqrt calls
-   * New function "sBipow", static wrapper for "bipow"
-   * Bugfix on "carryAdd"
+   * Function "nqrt" modified.
+     * Change on "add" calls by "pAdd".
+     * Change on "equals" calls by "hardEquals".
+     * Change on "sub" calls by "pSub".
+     * Change on "bipow" calls by "sBipow".
+     * Performance increase of 38'758% based on 10.000 nqrt calls.
+   * New function "sBipow", static wrapper for "bipow".
+   * Bugfix on "carryAdd".
  * v3.11 (Release)
-   * Deleted unused variables
+   * Deleted unused variables.
  * v4.0 (Major Release)
-   * Review for CUDA codification
+   * Review for CUDA codification.
      * Changes on all functionalities. We operate directly upon the pointer, saving a bunch of performance (e.g: up to 25'957% on addition operation). Also reduce RAM consumption to 50%.
-     * Additional validations on "nqrt" function
-     * General code cleansing
-     * Review and removal of "showError" codes
-     * Overall, 201 code lines were removed on the optimisation
-   * Bugfix on "validateBI"
-   * Changes on "dvs" to delegate on static function "sDvs"
-   * Changes on "nqrt" to delegate on static funcion "sNqrt"
-   * New function "free" to massive memory free
-   * Bugfix on "toString" with negative numbers
-   * Some variables are changed to static
-   * Deleted "limits.h" library
+     * Additional validations on "nqrt" function.
+     * General code cleansing.
+     * Review and removal of "showError" codes.
+     * Overall, 201 code lines were removed on the optimisation.
+   * Bugfix on "validateBI".
+   * Changes on "dvs" to delegate on static function "sDvs".
+   * Changes on "nqrt" to delegate on static funcion "sNqrt".
+   * New function "free" to massive memory free.
+   * Bugfix on "toString" with negative numbers.
+   * Some variables are changed to static.
+   * Deleted "limits.h" library.
    * Component Test performed. Changes derived of it:
-     * Added default value on "BImemcpy": 0
-     * Added a "clean" call on pAppend
-     * Bugfix on "append" with negative numbers
-     * Bugfix on division (0 / 0 = 1)
-     * Bugifx on 0 or below index root
-     * Bugfix on below 0 index power
+     * Added default value on "BImemcpy": 0.
+     * Added a "clean" call on pAppend.
+     * Bugfix on "append" with negative numbers.
+     * Bugfix on division (0 / 0 = 1).
+     * Bugifx on 0 or below index root.
+     * Bugfix on below 0 index power.
  * v4.1 (Release)
-   * Bugfix on subtraction when a < b
-   * Added cast to int on strlen
+   * Bugfix on subtraction when a < b.
+   * Added cast to int on strlen.
  * v4.2 (Release)
-   * Bugfix on "b" when a < b
+   * Bugfix on "b" when a < b.
  * v4.3 (Release)
-   * Bugfix on one-digit division
-   * Bugfix on bipow when va < 0
+   * Bugfix on one-digit division.
+   * Bugfix on bipow when va < 0.
  * v4.4 (Release)
-   * New static BI data
-   * Improvement on BI_initialize
-   * Bugfix on same-operator functions
-     * add(a, a)
-     * sub(a, a)
-     * mul(a, a)
-     * dvs(a, a)
+   * New static BI data.
+   * Improvement on BI_initialize.
+   * Bugfix on same-operator functions.
+     * add(a, a).
+     * sub(a, a).
+     * mul(a, a).
+     * dvs(a, a).
  * v4.5 (Release)
-   * carryAdd is no longer static
+   * carryAdd is no longer static.
  * v4.6 (Release)
-   * add new field "k" on BigInteger, as preparation for Major Release BigInteger v5.0
+   * add new field "k" on BigInteger, as preparation for Major Release BigInteger v5.0.
  * v4.7 (Release)
-   * "validateBI" changes to improve performance
-   * Deleted cast on malloc to imporve performance
-   * Bugfix on sNqrt when data lenght < 0
-   * Performance improvement on clean function
+   * "validateBI" changes to improve performance.
+   * Deleted cast on malloc to imporve performance.
+   * Bugfix on sNqrt when data lenght < 0.
+   * Performance improvement on clean function.
  * v4.71 (Release)
-   * Added function iniBIT to allocate BIT memory
-   * Now multiplication and division works with external BIT to increase performance
- * _v5.0 (Major Release)
-   * _Coming Soon
+   * Added function iniBIT to allocate BIT memory.
+   * Now multiplication and division works with external BIT to increase performance.
+ * v5.0 (Major Release)
+   * Changed "n" type from int to char, reducing up to 75% of memory usage.
+   * Use of external variables to increase performance (gaining memory usage).
+   * "free" function has been removed.
+   * New precompiler parameter added for setting BI length (C_MAX_LENGTH). If not present, 4096 will be set as length.
+   * New precompiler parameter added for making BI validations optional (CVALIDATE). If it have a value of 1, validations will be made.
+   * New precompiler parameter added or Standalone BI (BI_STANDALONE).
+   * "iniBIT" function has been removed, as it has been integrated on "init" function.
+   * Comment and identation revision.
+   * Typedef created in order to remove "struct" references (code clarify).
+   * Improvement made on "add" in order to improve performance.
+   * Improvement made on "subtract". Now we call "addition" instead of "pAdd". Performance improvement.
+   * Improvement made on "subtract". "CarryType" has been removed.
+   * Improvement made on "mul". Now we call "addition" instead of "pAdd". Performance improvement.
+   * Performance improvement made on "division" as "append" functionality has been rewritten.
+      * "dtmp" variable removed.
+      * "pAppend" is now an internal (static) function for "division" exclusive use.
+   * Improvement made on "nqrt". Now we call "addition" instead of "pAdd". Performance improvement.
+   * Performance improvement on "hardEquals" when "va" and "vb" are the same memory pointer.
+   * "Clean" function is now public.
+   * "BOperation" interface now created. Shall be used when BI_STANDALONE has not been declared.
+     * Common functions have been refactorized.
+     * _BI_Initialize not longer static. 
+   * New interface BigDouble created. Now you can use Integer and Double operations
+     * "nqrt" and "bipow" are still integer-only operations.
 
 
 ## How To Configure it?
-* Download both header and source code file
-* Change "int MAX_LENGTH = 512;" to adjust desired max length on source code file. 
-* Change "int n[512];" to same value as previous point to allow storage of digits
-* Initially, it worked with 4096 digits, so there will be no problem to use it - it was downgraded to 512 in order to preserve som RAM.
+* Download both header and source code file, or go to "Release" section and download the latest release.
+
+There are several configurations to make
+* If you want to set a custom digit length, use `C_MAX_LENGTH` precompiler option (i.e. `-D C_MAX_LENGTH=512`).
+* If you trust your data input and want to gain some performance, you can deactivate most of the data validation. Use `CVALIDATE` precompiler option
+  * Use `-D CVALIDATE=0` to avoid validations
+  * Use `-D CVALIDATE=1` or do not define `CVALIDATE` if you want to ensure the validations
+* If you want to work only with Integers, use `BI_STANDALONE` precompiler option (`-D BI_STANDALONE=1`)
+  * When using BigInteger Standalone, just `#include "BigInteger.h"`
+  * When not using BigInteger Standalone, `#indlude "BOperation.h"` and do not `#include "BigInteger.h"`
 
 
 ## How it works?
@@ -176,6 +205,11 @@ This architecture was made during my Degree final paper (TFG, in Spain), to cove
   * Appending function (append function)
   * Compare function (equals function)
   * Initialize and create BigInteger (newBI function)
+
+
+## How about BD (BigDouble)?
+* BD (BigDouble) is an extension for BigInteger, so it works the same way.
+* You can perform the same operations on both structures, as they share most of their information.
 
 
 ## Want to know more?
