@@ -158,6 +158,8 @@ This architecture was made during my Degree final paper (TFG, in Spain), to cove
      * _BI_Initialize not longer static. 
    * New interface BigDouble created. Now you can use Integer and Double operations
      * "nqrt" and "bipow" are still integer-only operations.
+ * v5.01 (Release)
+   * Bugfix on hardEquals function 
 
 
 ## How To Configure it?
