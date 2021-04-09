@@ -175,6 +175,8 @@
  *      - Creada la interfaz BOperation
  *        * Se abstraen funciones comunes.
  *        * _BI_Initialize ya no es static
+ *    v5.01
+ *      - Bugfix en HardEquals 
  */
 #include "stdio.h"
 #include "stdlib.h"
@@ -185,7 +187,7 @@
 #include "BOperation.h"
 #endif
 
-static float BI_VERSION = 5.0f;
+static float BI_VERSION = 5.01f;
 
 #if BI_STANDALONE == 1
 static int validate =
@@ -736,8 +738,10 @@ void hardEquals(void* va, void* vb, int* ret) {
   int sig;
 
   //si el puntero es el mismo, el valor es el mismo
-  if (va == vb)
-    return 0;
+  if (va == vb) {
+    *ret = 0;
+    return;
+  }
 
   /*calculamos el signo
    *
