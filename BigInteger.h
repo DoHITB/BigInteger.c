@@ -18,7 +18,7 @@ static int MAX_LENGTH =
 typedef struct BigInteger {
   char k;
   int count;
-  char n[
+  signed char n[
 #ifdef C_MAX_LENGTH
     C_MAX_LENGTH
 #else
