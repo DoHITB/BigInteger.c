@@ -160,6 +160,8 @@ This architecture was made during my Degree final paper (TFG, in Spain), to cove
      * "nqrt" and "bipow" are still integer-only operations.
  * v5.01 (Release)
    * Bugfix on hardEquals function 
+ * v5.02 (Release)
+   * Improvement on "n" variable. Now it's signed char  
 
 
 ## How To Configure it?
