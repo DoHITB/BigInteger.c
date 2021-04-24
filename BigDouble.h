@@ -10,15 +10,15 @@
 
  //struct
 typedef struct BigDouble {
-	char k;
-	int count;
-	char n[4096];
-	int cpos;
-	char sig;
+  char k;
+  int count;
+  signed char n[4096];
+  int cpos;
+  char sig;
 } BigDouble;
 
 /*
- * Variables útiles
+ * Variables Ãºtiles
  */
 static struct BigDouble _DZERO;
 static struct BigDouble _DONE;
@@ -40,7 +40,7 @@ static int dini[13] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 static char coma = ',';
 static char stComa[2] = {',', '\0'};
 
-//longitud máxima
+//longitud mÃ¡xima
 static int D_MAX_LENGTH =
 #ifdef CD_MAX_LENGTH
   CD_MAX_LENGTH;
