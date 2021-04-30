@@ -161,7 +161,11 @@ This architecture was made during my Degree final paper (TFG, in Spain), to cove
  * v5.01 (Release)
    * Bugfix on hardEquals function 
  * v5.02 (Release)
-   * Improvement on "n" variable. Now it's signed char  
+   * Improvement on "n" variable. Now it's signed char
+ * v5.1 (Release)
+   * Included service mode by using precompiler directive "BI_SERVICE". If "BI_SERVICE == 1", program won't stop if error found.
+   * Improved dynamically BigDouble creation by using precompiler directives
+   * Bugfixes  
 
 
 ## How To Configure it?
@@ -175,6 +179,7 @@ There are several configurations to make
 * If you want to work only with Integers, use `BI_STANDALONE` precompiler option (`-D BI_STANDALONE=1`)
   * When using BigInteger Standalone, just `#include "BigInteger.h"`
   * When not using BigInteger Standalone, `#indlude "BOperation.h"` and do not `#include "BigInteger.h"`
+* If you are using BigInteger or BOperation as a service (i. e. don't want to stop execution on fail), use `BI_SERVICE` precompiler option (`-D BI_SERVICE=1`) 
 
 
 ## How it works?
