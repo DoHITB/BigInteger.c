@@ -194,7 +194,7 @@
 #include "BOperation.h"
 #endif
 
-static float BI_VERSION = 5.01f;
+static float BI_VERSION = 5.1f;
 
 #if BI_STANDALONE == 1
 static int validate =
