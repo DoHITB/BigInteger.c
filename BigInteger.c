@@ -177,6 +177,13 @@
  *        * _BI_Initialize ya no es static
  *    v5.01
  *      - Bugfix en HardEquals 
+ *    v5.1
+ *      - Añadido "signed" a n
+ *      - Cambios para añadir el modo servicio
+ *        * Nueva variable estática BIReturnCode
+ *        * Nueva función getReturnCode
+ *        * Nueva directiva BI_SERVICE para compilar en modo Servicio
+ *        * Añadimos "return" después de cada llamada a "showError" para forzar el fin de función
  */
 #include "stdio.h"
 #include "stdlib.h"
@@ -344,8 +351,10 @@ void newBI(void* dst, char* s, int sig) {
   //limpiamos el array
   clean(dst);
 
-  if (i > MAX_LENGTH + 1)
+  if (i > MAX_LENGTH + 1) {
     showError(1);
+    return;
+  }
 
   //recorremos el string y lo guardamos en integers
   for (; i >= 0; i--) {
@@ -356,8 +365,10 @@ void newBI(void* dst, char* s, int sig) {
     else
       if (s[i] == '-') 
         ssig = -1;
-      else
+      else {
         showError(2);
+        return;
+      }
   }
 
   //si nos envían un negativo, restamos una posición
@@ -378,8 +389,10 @@ void newBI(void* dst, char* s, int sig) {
  * Si los signos son iguales, hace una suma, sino, una resta.
  */
 void pAdd(void* va, void* vb, void* m) {
-  if (((memory*)m)->vt == NULL)
+  if (((memory*)m)->vt == NULL) {
     showError(11);
+    return;
+  }
 
   if (va == vb) {
     //add(a, a); delegamos en mul para hacer a = a * 2
@@ -544,9 +557,10 @@ void carryAdd(void* va, int move, int min) {
 
   //si ha quedado acarreo, lo guardamos al final;
   if (acc > 0) {
-    if (((BigInteger*)va)->count == MAX_LENGTH)
+    if (((BigInteger*)va)->count == MAX_LENGTH) {
       showError(1);
-    else
+      return;
+    } else
       ((BigInteger*)va)->n[++(((BigInteger*)va)->count)] = acc;
   }
 }
@@ -562,8 +576,10 @@ void pSub(void* va, void* vb, void* m) {
   int sig;
   int comp;
 
-  if (((memory*)m)->stmp == NULL)
+  if (((memory*)m)->stmp == NULL) {
     showError(10);
+    return;
+  }
 
   if (va == vb) {
     //sub(a, a);
@@ -805,9 +821,11 @@ void sMul(void* va, void* vb, void* m) {
   int comp;
   int calc = 0;
 
-  if (((memory*)m)->biBIT == NULL || ((memory*)m)->mzero == NULL || ((memory*)m)->mone == NULL || 
-      ((memory*)m)->mpart == NULL || ((memory*)m)->mret == NULL || ((memory*)m)->mtmp == NULL)
+  if (((memory*)m)->biBIT == NULL || ((memory*)m)->mzero == NULL || ((memory*)m)->mone == NULL ||
+      ((memory*)m)->mpart == NULL || ((memory*)m)->mret == NULL || ((memory*)m)->mtmp == NULL) {
     showError(3);
+    return;
+  }
 
   if (va == vb) {
     //mul(a, a)
@@ -952,8 +970,10 @@ static void pMul(int pos, void* vpart) {
 
   i = ((BigInteger*)vpart)->count + pos;
 
-  if (i >= MAX_LENGTH)
+  if (i >= MAX_LENGTH) {
     showError(1);
+    return;
+  }
 
   //generamos offset
   for (; i >= pos; i--)
@@ -996,8 +1016,10 @@ void sDvs(void* va, void* vb, void* m) {
   int sig;
   int comp;
 
-  if (((memory*)m)->dtmp == NULL || ((memory*)m)->done == NULL)
+  if (((memory*)m)->dtmp == NULL || ((memory*)m)->done == NULL) {
     showError(4);
+    return;
+  }
 
   //inicializamos el punto decimal
   BI_point = 0;
@@ -1075,9 +1097,11 @@ static void divide(void* va, void* vb, void* m) {
   int added;
   int dlen;
 
-  if (((memory*)m)->biBIT == NULL || ((memory*)m)->dTemp == NULL || ((memory*)m)->dret == NULL || 
-      ((memory*)m)->biTemp == NULL)
+  if (((memory*)m)->biBIT == NULL || ((memory*)m)->dTemp == NULL || ((memory*)m)->dret == NULL ||
+      ((memory*)m)->biTemp == NULL) {
     showError(5);
+    return;
+  }
 
   BImemcpy(((memory*)m)->dret, 0);
 
@@ -1257,9 +1281,11 @@ void sNqrt(void* va, int n, void* m) {
   int lmax = 0;
   int isEq = 0;
 
-  if (((memory*)m)->sret == NULL || ((memory*)m)->sraw == NULL || 
-      ((memory*)m)->sbase == NULL || ((memory*)m)->szero == NULL)
+  if (((memory*)m)->sret == NULL || ((memory*)m)->sraw == NULL ||
+      ((memory*)m)->sbase == NULL || ((memory*)m)->szero == NULL) {
     showError(9);
+    return;
+  }
 
   BImemcpy(((memory*)m)->sbase, 0);
   BImemcpy(((memory*)m)->szero, 0);
@@ -1362,8 +1388,10 @@ void sBipow(void* va, int p, void* m) {
   int i = 0;
   int sig = 0;
 
-  if (((memory*)m)->bres == NULL || ((memory*)m)->btmp == NULL)
+  if (((memory*)m)->bres == NULL || ((memory*)m)->btmp == NULL) {
     showError(6);
+    return;
+  }
 
   if (p < 0) {
     BImemcpy(va, 0);
@@ -1407,8 +1435,10 @@ void sBipow(void* va, int p, void* m) {
   }
 
   //si el número es muy grande, damos error
-  if (t > 0 && d2bi >= 10)
+  if (t > 0 && d2bi >= 10) {
     showError(8);
+    return;
+  }
 
   //normalizamos va
   if (((BigInteger*)va)->n[((BigInteger*)va)->count] < 0) {
@@ -1442,6 +1472,9 @@ void sBipow(void* va, int p, void* m) {
  * Muestra un error en base al índice que se le pasa
  */
 static void showError(int k) {
+#if BI_SERVICE == 1
+  BIReturnCode = k;
+#else
   if (k == 1)
     printf("Error. Limite alcanzado");
   else if (k == 2)
@@ -1474,6 +1507,7 @@ static void showError(int k) {
   printf("\n");
 
   exit(k * -1);
+#endif
 }
 #endif
 
@@ -1573,17 +1607,23 @@ void validateBI(void* a) {
   int i = 0;
 
   //validamos el tipo
-  if (((BigInteger*)a)->k != 'i')
+  if (((BigInteger*)a)->k != 'i') {
     showError(99);
+    return;
+  }
 
   //validamos la longitud
-  if (((BigInteger*)a)->count < 0 || ((BigInteger*)a)->count > MAX_LENGTH)
+  if (((BigInteger*)a)->count < 0 || ((BigInteger*)a)->count > MAX_LENGTH) {
     showError(99);
+    return;
+  }
 
   //validamos el resto de dígitos, que pueden ser positivos o negativos
   for (; i < MAX_LENGTH; i++) {
-    if (((BigInteger*)a)->n[i] < -9 || ((BigInteger*)a)->n[i] > 9)
+    if (((BigInteger*)a)->n[i] < -9 || ((BigInteger*)a)->n[i] > 9) {
       showError(99);
+      return;
+    }
   }
 }
 
@@ -1594,4 +1634,22 @@ void validateBI(void* a) {
  */
 int getPoint() {
   return BI_point;
+}
+
+/*
+ * Función getReturnCode
+ *
+ * Retorna el código de estado
+ */
+int getReturnCode() {
+  return BIReturnCode;
+}
+
+/*
+ * Función setReturnCode
+ *
+ * Modifica el código de estado
+ */
+void setReturnCode(int k) {
+  BIReturnCode = k;
 }
