@@ -94,6 +94,9 @@ static BigInteger _MIN;
 //Baliza para división con double
 static int BI_point;
 
+//Código de estado
+static int BIReturnCode;
+
 //Generales
 void _BI_initialize();
 void BImemcpy(void* dst, int orig);
@@ -103,6 +106,8 @@ static int signum(int a, int b);
 void validateBI(void* a);
 void hardEquals(void* va, void* vb, int* ret);
 int getPoint();
+int getReturnCode();
+void setReturnCode(int k);
 
 //Suma
 void pAdd(void* va, void* vb, void* m);
