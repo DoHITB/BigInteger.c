@@ -7,6 +7,8 @@
  *  CHANGELOG
  *    v0.1
  *      - Creación a partir de BigInteger 4.71 ~ 5.00
+ *    v1.1
+ *      - Añadimos return tras showError
  */
 #include "stdio.h"
 #include "stdlib.h"
@@ -139,8 +141,10 @@ static void cal2op(void* va, void* vb, void* m, char k, int* ret) {
   else
     return;
 
-  if (((memory*)m)->a == NULL || ((memory*)m)->b == NULL) 
+  if (((memory*)m)->a == NULL || ((memory*)m)->b == NULL) {
     showError(90);
+    return;
+  }
 
   //validamos los datos antes de tratarlos
   if (ka == 'i') {
@@ -432,8 +436,10 @@ void operate(int count, ...) {
   int i = 0;
   void* cal = malloc(sizeof(operation));
 
-  if (cal == NULL)
+  if (cal == NULL){
     showError(12);
+    return;
+  }
 
   for (i = 0; i < count; i++) {
     //copiamos el operation que nos envían
@@ -507,6 +513,9 @@ void BI2BD(void* dst, void* src) {
  * Muestra un error en base al índice que se le pasa
  */
 void showError(int k) {
+#if BI_SERVICE == 1
+  setReturnCode(k);
+#else
   if (k == 1)
     printf("Error. Limite alcanzado");
   else if (k == 2)
@@ -545,6 +554,7 @@ void showError(int k) {
   printf("\n");
 
   exit(k * -1);
+#endif
 }
 
 /*
@@ -627,8 +637,10 @@ static char getKind(void* a) {
   char* c = malloc(sizeof(char));
   char ret = ' ';
 
-  if (c == NULL) 
+  if (c == NULL) {
     showError(97);
+    return ret;
+  }
 
   memcpy(c, a, sizeof(char));
 
@@ -694,6 +706,11 @@ void init(void** m) {
   BImemcpy(((memory*)m)->vt, 2);
 }
 
+/*
+ * Función getMemorySize
+ *
+ * Devuelve el tamaño de memory.
+ */
 size_t getMemorySize() {
   return (sizeof(BigInteger) * 21) + sizeof(BIT);
 }
