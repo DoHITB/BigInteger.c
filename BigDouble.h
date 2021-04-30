@@ -10,11 +10,17 @@
 
  //struct
 typedef struct BigDouble {
-  char k;
-  int count;
-  signed char n[4096];
-  int cpos;
-  char sig;
+ char k;
+ int count;
+ signed char n[
+#ifdef C_MAX_LENGTH
+ C_MAX_LENGTH
+#else
+ 4096
+#endif
+ ];
+ int cpos;
+ char sig;
 } BigDouble;
 
 /*
@@ -42,10 +48,10 @@ static char stComa[2] = {',', '\0'};
 
 //longitud máxima
 static int D_MAX_LENGTH =
-#ifdef CD_MAX_LENGTH
-  CD_MAX_LENGTH;
+#ifdef C_MAX_LENGTH
+ C_MAX_LENGTH;
 #else
-  4095;
+ 4096;
 #endif
 
 //creacion
