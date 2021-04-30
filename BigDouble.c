@@ -6,27 +6,32 @@
  *
  *  CHANGELOG
  *    v0.1
- *      - Funci髇 de creaci髇
- *      - Funci髇 de display
- *      - F鷑ci髇 de suma
+ *      - Funci贸n de creaci贸n
+ *      - Funci贸n de display
+ *      - F煤nci贸n de suma
  *    v0.2
- *      - Remodelaci髇 completa de la estructura
- *      - Funci髇 de creaci髇
- *      - Funci髇 de conversi髇 BI > BD
+ *      - Remodelaci贸n completa de la estructura
+ *      - Funci贸n de creaci贸n
+ *      - Funci贸n de conversi贸n BI > BD
  *    v1.0
  *      - Modelo funcional basado en BigOperation.
+ *    v1.1
+ *      - A帽adido control de longitud con C_MAX_LENGTH
+ *      - Cambiado par谩metro de precompilador de D_MAX_LENGTH
+ *      - A帽adido "signed" a n
+ *      - A帽adido return tras showError
  */
 #include "stdio.h"
 #include "stdlib.h"
 #include "string.h"
 #include "BigDouble.h"
 
-float version = 1.0f;
+float version = 1.1f;
 
 /*
- * Funci髇 initialize
+ * Funci贸n initialize
  *
- * Da valores a ciertos datos 鷗iles.
+ * Da valores a ciertos datos 煤tiles.
  */
 void _BD_initialize(int value) {
   int i = 0;
@@ -108,9 +113,9 @@ void _BD_initialize(int value) {
 }
 
 /*
- * Funci髇 BDmemcpy
+ * Funci贸n BDmemcpy
  *
- * Copia en el puntero destino la variable 鷗il deseada
+ * Copia en el puntero destino la variable 煤til deseada
  */
 void BDmemcpy(void* dst, int value) {
   _BD_initialize(value);
@@ -164,8 +169,10 @@ void newBD(void* dst, char* s, int sig) {
   //limpiamos el array
   clean(dst);
 
-  if (i > D_MAX_LENGTH + 1)
+  if (i > D_MAX_LENGTH + 1) {
     showError(1);
+    return;
+  }
 
   //por defecto, no hay decimales
   ((BigDouble*)dst)->cpos = 0;
@@ -182,12 +189,14 @@ void newBD(void* dst, char* s, int sig) {
         cma = 1;
       } else if (s[i] == '-')
         ssig = -1;
-      else
+      else {
         showError(2);
+        return;
+      }
     }
   }
 
-  //si nos env韆n un negativo, restamos una posici髇
+  //si nos env铆an un negativo, restamos una posici贸n
   if (s[0] == '-') 
     --f;
   
@@ -195,7 +204,7 @@ void newBD(void* dst, char* s, int sig) {
   if (((BigDouble*)dst)->cpos < 0)
     ((BigDouble*)dst)->cpos = 0;
 
-  //si hay decimales, restamos una posici髇
+  //si hay decimales, restamos una posici贸n
   if (cma == 1)
     --f;
 
@@ -209,7 +218,7 @@ void newBD(void* dst, char* s, int sig) {
 }
 
 /*
- * Funci髇 validateBD
+ * Funci贸n validateBD
  *
  * Valida que todos los datos del BD sean coherentes
  */
@@ -217,20 +226,28 @@ void validateBD(void* a) {
   int i = 0;
 
   //validamos el tipo
-  if (((BigDouble*)a)->k != 'd')
+  if (((BigDouble*)a)->k != 'd') {
     showError(99);
+    return;
+  }
 
   //validamos la longitud
-  if (((BigDouble*)a)->count < 0 || ((BigDouble*)a)->count > D_MAX_LENGTH)
+  if (((BigDouble*)a)->count < 0 || ((BigDouble*)a)->count > D_MAX_LENGTH) {
     showError(99);
+    return;
+  }
 
-  //validamos la posici髇 decimal
-  if(((BigDouble*)a)->cpos < 0 || ((BigDouble*)a)->cpos > D_MAX_LENGTH)
+  //validamos la posici贸n decimal
+  if (((BigDouble*)a)->cpos < 0 || ((BigDouble*)a)->cpos > D_MAX_LENGTH) {
     showError(99);
+    return;
+  }
 
-  //validamos el resto de d韌itos, que pueden ser positivos o negativos
+  //validamos el resto de d铆gitos, que pueden ser positivos o negativos
   for (; i < D_MAX_LENGTH; i++) {
-    if (((BigDouble*)a)->n[i] < -9 || ((BigDouble*)a)->n[i] > 9)
+    if (((BigDouble*)a)->n[i] < -9 || ((BigDouble*)a)->n[i] > 9) {
       showError(99);
+      return;
+    }
   }
 }
