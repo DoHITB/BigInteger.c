@@ -166,7 +166,8 @@ This architecture was made during my Degree final paper (TFG, in Spain), to cove
    * Included service mode by using precompiler directive "BI_SERVICE". If "BI_SERVICE == 1", program won't stop if error found.
    * Improved dynamically BigDouble creation by using precompiler directives
    * Bugfixes  
-
+ * v5.2 (Release)
+   * Bugfix on division while "b" have a signle digit
 
 ## How To Configure it?
 * Download both header and source code file, or go to "Release" section and download the latest release.
