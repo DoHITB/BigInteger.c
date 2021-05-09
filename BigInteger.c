@@ -186,6 +186,8 @@
  *        * Añadimos "return" después de cada llamada a "showError" para forzar el fin de función
  *    v5.2
  *      - Bugfix en la división cuando b tiene un solo dígito
+ *    v5.21
+ *      - Bugfix en la división con decimales
  */
 #include "stdio.h"
 #include "stdlib.h"
@@ -196,7 +198,7 @@
 #include "BOperation.h"
 #endif
 
-static float BI_VERSION = 5.2f;
+static float BI_VERSION = 5.21f;
 
 #if BI_STANDALONE == 1
 static int validate =
@@ -1159,8 +1161,12 @@ static void divide(void* va, void* vb, void* m) {
   if (((BigInteger*)va)->k == 'd') {
     //va es double. Cambiamos ligeramente el funcionamiento de la división.
     BI_point = mLen;
-    len = MAX_LENGTH - 2;
-    mLen = MAX_LENGTH - 1;
+    len = MAX_LENGTH - 1;
+
+    if (((BigInteger*)vb)->count == 0)
+      mLen = MAX_LENGTH - 2;
+    else
+      mLen = MAX_LENGTH - 1;
   }
 
   //por cada cifra decimal que hemos generado
@@ -1248,10 +1254,20 @@ static void divide(void* va, void* vb, void* m) {
       }
     }
 
-    ((BigInteger*)((memory*)m)->dret)->n[len - i] = res;
-
     //restamos
     pSub(((memory*)m)->dTemp, &((BIT*)((memory*)m)->biBIT)->BI[res], m);
+
+    if (i <= dlen)
+      ((BigInteger*)((memory*)m)->dret)->n[len - i] = res;
+    else {
+      //estamos en la zona decimal. Validamos si merece la pena añadir el dato
+      if (((BigInteger*)((memory*)m)->dTemp)->count == 0 && ((BigInteger*)((memory*)m)->dTemp)->n[0] == 0) {
+        //hemos encontrado un cociente con resto 0. No hay más datos que tratar y finalizamos
+        i = len + 1;
+      } else
+        //Aún quedan datos por tratar, añadimos el dato
+        ((BigInteger*)((memory*)m)->dret)->n[len - i] = res;
+    }
   }
 
   ((BigInteger*)((memory*)m)->dret)->count = mLen;
