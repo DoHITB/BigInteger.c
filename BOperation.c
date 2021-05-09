@@ -11,6 +11,8 @@
  *      - Añadimos return tras showError
  *    v1.2
  *      - Bugfix en divisón cuando b solo tiene una cifra
+ *    v1.21
+ *      - Bugfix en división con decimales
  */
 #include "stdio.h"
 #include "stdlib.h"
@@ -217,6 +219,7 @@ static void cal2op(void* va, void* vb, void* m, char k, int* ret) {
 
       if (k == 'd') {
         adj = 0;
+        dvj = ((BigInteger*)va)->count;
 
         //estamos con un double. Si estamos dividiendo tenemos que validar que es factible a < b
         if (((BigInteger*)((memory*)m)->a)->count < ((BigInteger*)((memory*)m)->b)->count) {
@@ -264,11 +267,15 @@ static void cal2op(void* va, void* vb, void* m, char k, int* ret) {
           ((BigDouble*)va)->cpos = (((BigDouble*)va)->count - getPoint()) + adj;
 
           //si cpos >= count, el resultado es 0,n. Lo pasamos a modo negativo para que decimalize lo trate
-          if (((BigDouble*)va)->cpos > ((BigDouble*)va)->count && ((BigDouble*)va)->count > 0)
-            ((BigDouble*)va)->cpos = ((BigDouble*)va)->count - ((BigDouble*)va)->cpos - 1;
+          if (((BigDouble*)va)->cpos != ((BigDouble*)va)->count) {
+            //if (((BigDouble*)va)->cpos > ((BigDouble*)va)->count && ((BigDouble*)va)->count > 0)
+            if (((BigDouble*)va)->cpos > dvj && dvj > 0)
+              ((BigDouble*)va)->cpos = ((BigDouble*)va)->count - ((BigDouble*)va)->cpos - 1;
 
-          if (((BigDouble*)va)->cpos > ((BigDouble*)va)->count && ((BigDouble*)va)->count == 0)
-            ((BigDouble*)va)->cpos = ((BigDouble*)va)->count - ((BigDouble*)va)->cpos;
+            //if (((BigDouble*)va)->cpos > ((BigDouble*)va)->count && ((BigDouble*)va)->count == 0)
+            if (((BigDouble*)va)->cpos > dvj && dvj == 0)
+              ((BigDouble*)va)->cpos = ((BigDouble*)va)->count - ((BigDouble*)va)->cpos;
+          }
 
           //si cpos == count y hemos incrementado para igualar, dividimos entre 10
           if (((BigDouble*)va)->cpos == ((BigDouble*)va)->count && dvi == 2)
@@ -277,11 +284,11 @@ static void cal2op(void* va, void* vb, void* m, char k, int* ret) {
           //si cpos es negativo o es mayor que count, es que es 0,n
           if (((BigDouble*)va)->cpos < 0) 
             decimalize(va);
-          else {
+          /*else {
             //si cpos = longitud, es que no hay decimales. Lo aislamos de decimalize porque en ese caso count = cpos
             if (((BigDouble*)va)->cpos == ((BigDouble*)va)->count)
               ((BigDouble*)va)->cpos = 0;
-          }
+          }*/
         } else {
           //reajustamos el valor decimal
           if (adj > 0)
