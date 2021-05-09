@@ -184,6 +184,8 @@
  *        * Nueva función getReturnCode
  *        * Nueva directiva BI_SERVICE para compilar en modo Servicio
  *        * Añadimos "return" después de cada llamada a "showError" para forzar el fin de función
+ *    v5.2
+ *      - Bugfix en la división cuando b tiene un solo dígito
  */
 #include "stdio.h"
 #include "stdlib.h"
@@ -194,7 +196,7 @@
 #include "BOperation.h"
 #endif
 
-static float BI_VERSION = 5.1f;
+static float BI_VERSION = 5.2f;
 
 #if BI_STANDALONE == 1
 static int validate =
@@ -1108,8 +1110,8 @@ static void divide(void* va, void* vb, void* m) {
   len = ((BigInteger*)va)->count - ((BigInteger*)vb)->count;
 
   //llenamos BIT
-  BImemcpy(&(( BIT*)((memory*)m)->biBIT)->BI[0], 0);
-  memcpy(&(( BIT*)((memory*)m)->biBIT)->BI[1], vb, sizeof(BigInteger));
+  BImemcpy(&((BIT*)((memory*)m)->biBIT)->BI[0], 0);
+  memcpy(&((BIT*)((memory*)m)->biBIT)->BI[1], vb, sizeof(BigInteger));
 
   ((BIT*)((memory*)m)->biBIT)->status[0] = 1;
   ((BIT*)((memory*)m)->biBIT)->status[1] = 1;
@@ -1170,6 +1172,13 @@ static void divide(void* va, void* vb, void* m) {
     else 
       //ya no hay cifras. Bajamos un 0
       pAppend(((memory*)m)->dTemp, 0);
+
+    /*
+     * si b.len == 0, se da un bug en el que el BI resultante del append tiene la forma {n0} con len = 1
+     * cuando debería tener la forma {n} con len = 0 (solo sucede durante la primera vuelta
+     */
+    if (((BigInteger*)((memory*)m)->dTemp)->count == 1 && ((BigInteger*)((memory*)m)->dTemp)->n[1] == 0)
+      --((BigInteger*)((memory*)m)->dTemp)->count;
 
     //Retorna 0 si son iguales, retorna 1 si a > b, retorna 2 si a < b.
     hardEquals(((memory*)m)->dTemp, &((BIT*)((memory*)m)->biBIT)->BI[currentBIT], &eq);
