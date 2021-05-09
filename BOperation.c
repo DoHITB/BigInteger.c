@@ -9,6 +9,8 @@
  *      - Creación a partir de BigInteger 4.71 ~ 5.00
  *    v1.1
  *      - Añadimos return tras showError
+ *    v1.2
+ *      - Bugfix en divisón cuando b solo tiene una cifra
  */
 #include "stdio.h"
 #include "stdlib.h"
@@ -262,8 +264,11 @@ static void cal2op(void* va, void* vb, void* m, char k, int* ret) {
           ((BigDouble*)va)->cpos = (((BigDouble*)va)->count - getPoint()) + adj;
 
           //si cpos >= count, el resultado es 0,n. Lo pasamos a modo negativo para que decimalize lo trate
-          if (((BigDouble*)va)->cpos > ((BigDouble*)va)->count)
+          if (((BigDouble*)va)->cpos > ((BigDouble*)va)->count && ((BigDouble*)va)->count > 0)
             ((BigDouble*)va)->cpos = ((BigDouble*)va)->count - ((BigDouble*)va)->cpos - 1;
+
+          if (((BigDouble*)va)->cpos > ((BigDouble*)va)->count && ((BigDouble*)va)->count == 0)
+            ((BigDouble*)va)->cpos = ((BigDouble*)va)->count - ((BigDouble*)va)->cpos;
 
           //si cpos == count y hemos incrementado para igualar, dividimos entre 10
           if (((BigDouble*)va)->cpos == ((BigDouble*)va)->count && dvi == 2)
