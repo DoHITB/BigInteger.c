@@ -6,7 +6,7 @@ Correctly tested working with up to 4096 digits integer and double (on the maste
 This architecture was made during my Degree final paper (TFG, in Spain), to cover an RSA cryptoanalsys.
 
 
-## Changelog
+## BigInteger.c Changelog
  * v1.1 (beta)
    * Review variables and functions, making it "static" when convenient.
    * Changing all pointer references to "void" to avoid memory leakage.
@@ -168,6 +168,30 @@ This architecture was made during my Degree final paper (TFG, in Spain), to cove
    * Bugfixes  
  * v5.2 (Release)
    * Bugfix on division while "b" have a signle digit
+ * v5.22 (Bugfix)
+   * General bugfix on division
+
+
+## BigDouble.c Changelog
+ * v1.0 (Release)
+   * Basic functional model based on BigOperation
+ * v1.1 (Release)
+   * Added length control via C_MAX_LENGTH
+   * Removed D_MAX_LENGTH control
+   * "signed" added to "n" (inside struct)
+   * Added a return after showError (service mode)
+
+
+## BOperation.c Changelog
+ * v1.0 (Release)
+   * Basic functional model
+ * v1.1 (Release)
+   * Return added after showError (service mode)
+ * v1.2 (Release)
+   * Bugfix on division when "b" have only one digit
+ * v1.22 (Bugfix)
+   * Final bugfix on division  
+
 
 ## How To Configure it?
 * Download both header and source code file, or go to "Release" section and download the latest release.
