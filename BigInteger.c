@@ -188,6 +188,8 @@
  *      - Bugfix en la división cuando b tiene un solo dígito
  *    v5.21
  *      - Bugfix en la división con decimales
+ *    v5.22
+ *      - Bugfix en la división en general + Prueba integrada
  */
 #include "stdio.h"
 #include "stdlib.h"
@@ -198,7 +200,7 @@
 #include "BOperation.h"
 #endif
 
-static float BI_VERSION = 5.21f;
+static float BI_VERSION = 5.22f;
 
 #if BI_STANDALONE == 1
 static int validate =
@@ -1026,7 +1028,7 @@ void sDvs(void* va, void* vb, void* m) {
   }
 
   //inicializamos el punto decimal
-  BI_point = 0;
+  BI_point = -1;
 
   if (va == vb) {
     //dvs(a, a)
@@ -1056,7 +1058,10 @@ void sDvs(void* va, void* vb, void* m) {
       //si a = b, a/b = 1
       hardEquals(va, ((memory*)m)->dtmp, &comp);
 
-      if (comp == 0)
+      //con esto indicamos que no hay ningún decimal
+      BI_point = -2;
+
+      if (comp == 0) 
         //si a = 0 (por tanto, b = 0), retornamos 0
         memcpy(va, ((memory*)m)->dtmp, sizeof(BigInteger));
       else
@@ -1160,7 +1165,11 @@ static void divide(void* va, void* vb, void* m) {
 
   if (((BigInteger*)va)->k == 'd') {
     //va es double. Cambiamos ligeramente el funcionamiento de la división.
-    BI_point = mLen;
+    if (mLen == 0)
+      BI_point = mLen;
+    else
+      BI_point = mLen - 1;
+
     len = MAX_LENGTH - 1;
 
     if (((BigInteger*)vb)->count == 0)
