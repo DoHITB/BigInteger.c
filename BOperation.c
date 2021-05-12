@@ -13,6 +13,8 @@
  *      - Bugfix en divisón cuando b solo tiene una cifra
  *    v1.21
  *      - Bugfix en división con decimales
+ *    v1.22
+ *      - Bugfix en la división en general + Prueba integrada
  */
 #include "stdio.h"
 #include "stdlib.h"
@@ -218,7 +220,7 @@ static void cal2op(void* va, void* vb, void* m, char k, int* ret) {
       }
 
       if (k == 'd') {
-        adj = 0;
+        adj = -1;
         dvj = ((BigInteger*)va)->count;
 
         //estamos con un double. Si estamos dividiendo tenemos que validar que es factible a < b
@@ -263,32 +265,53 @@ static void cal2op(void* va, void* vb, void* m, char k, int* ret) {
           adj *= 2;
 
         if (k == 'd') {
-          //el ajuste decimal de la división es distinto.
-          ((BigDouble*)va)->cpos = (((BigDouble*)va)->count - getPoint()) + adj;
+          /*
+           * Si getPoint retorna -1 o -2 significa que no ha tratado el dato (p. ej. estamos dividiendo a/1)
+           * por tanto, no hace falta hacer ningún tratamiento
+           */
+          if(getPoint() >= 0 || adj > 0){
+            //el ajuste decimal de la división es distinto.
+            ((BigDouble*)va)->cpos = (((BigDouble*)va)->count - getPoint()) + adj;
 
-          //si cpos >= count, el resultado es 0,n. Lo pasamos a modo negativo para que decimalize lo trate
-          if (((BigDouble*)va)->cpos != ((BigDouble*)va)->count) {
-            //if (((BigDouble*)va)->cpos > ((BigDouble*)va)->count && ((BigDouble*)va)->count > 0)
-            if (((BigDouble*)va)->cpos > dvj && dvj > 0)
-              ((BigDouble*)va)->cpos = ((BigDouble*)va)->count - ((BigDouble*)va)->cpos - 1;
+            //puede que el resultado tras la transformación haya dado lugar a un getPoint() negativo
+            if (getPoint() == -1)
+              --((BigDouble*)va)->cpos;
+            else if (getPoint() == -2)
+              ((BigDouble*)va)->cpos -= 2;
 
-            //if (((BigDouble*)va)->cpos > ((BigDouble*)va)->count && ((BigDouble*)va)->count == 0)
-            if (((BigDouble*)va)->cpos > dvj && dvj == 0)
-              ((BigDouble*)va)->cpos = ((BigDouble*)va)->count - ((BigDouble*)va)->cpos;
-          }
+            //si cpos >= count, el resultado es 0,n. Lo pasamos a modo negativo para que decimalize lo trate
+            if (((BigDouble*)va)->cpos > ((BigDouble*)va)->count) {
+              //if (((BigDouble*)va)->cpos > ((BigDouble*)va)->count && ((BigDouble*)va)->count > 0)
+              if (((BigDouble*)va)->cpos > dvj && dvj > 0)
+                ((BigDouble*)va)->cpos = ((BigDouble*)va)->count - ((BigDouble*)va)->cpos - 1;
+  
+              //if (((BigDouble*)va)->cpos > ((BigDouble*)va)->count && ((BigDouble*)va)->count == 0)
+              if (((BigDouble*)va)->cpos > dvj && dvj == 0)
+                ((BigDouble*)va)->cpos = ((BigDouble*)va)->count - ((BigDouble*)va)->cpos;
+            }
 
-          //si cpos == count y hemos incrementado para igualar, dividimos entre 10
-          if (((BigDouble*)va)->cpos == ((BigDouble*)va)->count && dvi == 2)
-            ((BigDouble*)va)->cpos = -1;
-
-          //si cpos es negativo o es mayor que count, es que es 0,n
-          if (((BigDouble*)va)->cpos < 0) 
-            decimalize(va);
-          /*else {
-            //si cpos = longitud, es que no hay decimales. Lo aislamos de decimalize porque en ese caso count = cpos
-            if (((BigDouble*)va)->cpos == ((BigDouble*)va)->count)
+            //si cpos == count y hemos incrementado para igualar, dividimos entre 10
+            if (((BigDouble*)va)->cpos == ((BigDouble*)va)->count && dvi == 2)
+              ((BigDouble*)va)->cpos = -1;
+  
+            //si cpos es negativo o es mayor que count, es que es 0,n
+            if (((BigDouble*)va)->cpos < 0)
+              decimalize(va);
+            /*else {
+              //si cpos = longitud, es que no hay decimales. Lo aislamos de decimalize porque en ese caso count = cpos
+              if (((BigDouble*)va)->cpos == ((BigDouble*)va)->count)
+                ((BigDouble*)va)->cpos = 0;
+            }*/
+          } else {
+            //la división no ha hecho ningún tratamiento
+            if (getPoint() == -1) {
+              //respetamos los decimales originales
+              ((BigDouble*)va)->cpos = adi;
+            } else {
+              //el resultado es 0 o 1, y los decimales son 0
               ((BigDouble*)va)->cpos = 0;
-          }*/
+            }
+          }
         } else {
           //reajustamos el valor decimal
           if (adj > 0)
