@@ -28,7 +28,7 @@ typedef struct BigInteger {
 } BigInteger;
 
 //BIT, Buffer para multiplicación y división
-typedef struct BIT{
+typedef struct BIT {
   struct BigInteger BI[10];
   int status[10];
 } BIT;
@@ -133,6 +133,9 @@ void sNqrt(void* va, int n, void* m);
 
 //Potencia
 void sBipow(void* va, int p, void* m);
+
+//Módulo
+void mod(void* a, void* b, void* m);
 
 //Standalone
 #if BI_STANDALONE == 1 
