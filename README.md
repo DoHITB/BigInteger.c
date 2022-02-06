@@ -170,6 +170,8 @@ This architecture was made during my Degree final paper (TFG, in Spain), to cove
    * Bugfix on division while "b" have a signle digit
  * v5.22 (Bugfix)
    * General bugfix on division
+ * v5.3 (Release)
+   * Added new "mod" function that performs a %= b
 
 
 ## BigDouble.c Changelog
