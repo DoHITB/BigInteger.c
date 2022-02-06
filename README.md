@@ -259,3 +259,4 @@ There is a plan for several releases, that will be ongoing on further months.
 
 * Make "nqrt" and "bipow" works on non-integer data
 * Make "operate" functionality works (pending unit test)
+* Translate all comments to English
