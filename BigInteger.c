@@ -190,6 +190,8 @@
  *      - Bugfix en la división con decimales
  *    v5.22
  *      - Bugfix en la división en general + Prueba integrada
+ *    v5.3
+ *      - Añadida la función "mod", que simula la operación a %= b
  */
 #include "stdio.h"
 #include "stdlib.h"
@@ -200,7 +202,7 @@
 #include "BOperation.h"
 #endif
 
-static float BI_VERSION = 5.22f;
+static float BI_VERSION = 5.3f;
 
 #if BI_STANDALONE == 1
 static int validate =
@@ -1497,6 +1499,17 @@ void sBipow(void* va, int p, void* m) {
     ((BigInteger*)va)->n[((BigInteger*)va)->count] *= -1;
 
   memcpy(va, ((memory*)m)->bres, sizeof(BigInteger));
+}
+
+/*
+ * Función mod.
+ *
+ * Simula la operación a = a%b
+ */
+void mod(void* a, void* b, void* m) {
+  dvs(a, b, m);
+
+  memcpy(a, ((memory*)m)->dTemp, sizeof(BigInteger));
 }
 
 #if BI_STANDALONE == 1
