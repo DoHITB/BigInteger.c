@@ -172,6 +172,8 @@ This architecture was made during my Degree final paper (TFG, in Spain), to cove
    * General bugfix on division
  * v5.3 (Release)
    * Added new "mod" function that performs a %= b
+ * v5.31 (Bugfix)
+   * Bugfix on "getMemorySize" function
 
 
 ## BigDouble.c Changelog
@@ -193,6 +195,8 @@ This architecture was made during my Degree final paper (TFG, in Spain), to cove
    * Bugfix on division when "b" have only one digit
  * v1.22 (Bugfix)
    * Final bugfix on division  
+ * v1.23 (Bugfix)
+   * Bugfix on getMemorySize
 
 
 ## How To Configure it?
