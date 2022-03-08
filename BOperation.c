@@ -15,6 +15,8 @@
  *      - Bugfix en división con decimales
  *    v1.22
  *      - Bugfix en la división en general + Prueba integrada
+ *    v1.23
+ *      - Cambio en el cálculo de getMemorySize.
  */
 #include "stdio.h"
 #include "stdlib.h"
@@ -747,5 +749,5 @@ void init(void** m) {
  * Devuelve el tamaño de memory.
  */
 size_t getMemorySize() {
-  return (sizeof(BigInteger) * 21) + sizeof(BIT);
+  return sizeof(memory);
 }
