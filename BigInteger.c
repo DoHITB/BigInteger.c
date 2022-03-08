@@ -192,6 +192,8 @@
  *      - Bugfix en la división en general + Prueba integrada
  *    v5.3
  *      - Añadida la función "mod", que simula la operación a %= b
+ *    v5.31
+ *      - Cambio en el cálculo de getMemorySize.
  */
 #include "stdio.h"
 #include "stdlib.h"
@@ -202,7 +204,7 @@
 #include "BOperation.h"
 #endif
 
-static float BI_VERSION = 5.3f;
+static float BI_VERSION = 5.31f;
 
 #if BI_STANDALONE == 1
 static int validate =
@@ -220,7 +222,7 @@ CVALIDATE;
  * Retorna la t_size relativo a memory.
  */
 size_t getMemorySize() {
-  return (sizeof(BigInteger) * 19) + sizeof(BIT);
+  return sizeof(memory);
 }
 #endif
 
