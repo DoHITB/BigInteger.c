@@ -194,6 +194,8 @@
  *      - Añadida la función "mod", que simula la operación a %= b
  *    v5.31
  *      - Cambio en el cálculo de getMemorySize.
+ *    v5.32
+ *      - Bugfix (otra vez) en la división.
  */
 #include "stdio.h"
 #include "stdlib.h"
@@ -1283,7 +1285,7 @@ static void divide(void* va, void* vb, void* m) {
     }
   }
 
-  ((BigInteger*)((memory*)m)->dret)->count = mLen;
+  ((BigInteger*)((memory*)m)->dret)->count = len;
 
   memcpy(va, ((memory*)m)->dret, sizeof(BigInteger));
 
