@@ -174,6 +174,8 @@ This architecture was made during my Degree final paper (TFG, in Spain), to cove
    * Added new "mod" function that performs a %= b
  * v5.31 (Bugfix)
    * Bugfix on "getMemorySize" function
+ * v5.32 (Bugfix)
+   * Bugfix (again) on division function
 
 
 ## BigDouble.c Changelog
