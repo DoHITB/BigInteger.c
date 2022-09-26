@@ -123,7 +123,7 @@ Then, you can define both <pre>-D CVALIDATE=0 BI_STANDALONE=1</pre>. With this o
 <div class="content" id="performancecon">
 BigInteger code has been widely tested around, both in accuracy and performance, with the goal of having minimal possible RAM and CPU usage while having peak performance.<br />
 On a small benchmark (that can be found below), it can perform ~15.000 operations each second on C/C++ mode, and ~70.000 operations on CUDA mode (with a <pre>&lt;&lt;&lt;64, 64&gt;&gt;&gt;</pre> cluster configuration).<br />
-A single BigInteger (with <pre>C_MAX_LENGTH=4096</pre>) is only 4104 bytes length (exact formula is <pre>C_MAX_LENGTH + sizeof(char) + sizeof(int)</pre>; and memory object it's only 160 bytes.<br /><br /><br />
+A single BigInteger (with <pre>C_MAX_LENGTH=4096</pre>) is only 4104 bytes length (exact formula is <pre>C_MAX_LENGTH + sizeof(char) + sizeof(int)</pre>); and memory object it's only 160 bytes.<br /><br /><br />
 <div class="code">
 <pre>
  
