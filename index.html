@@ -1,0 +1,443 @@
+<html>
+<head>
+  <title>BigInteger - C/C++/CUDA Solution for big math</title>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <style type="text/css">
+  pre{display:initial;background: rgba(110,118,129,0.4);border-radius:6px;padding: 2px 6px;}
+  body{background: #0d1117;color: #c9d1d9;font-family: sans-serif;font-size:16px;}
+  .title{padding:25px;font-size:24px;}
+  .title span{width: 100%;border-bottom:2px solid #58a6ff;position: relative;display: inherit;padding-bottom: 3px;}
+  .content{height:0px;overflow:hidden;padding-left:25px;padding-right:25px;line-height:1.5;transition:height 2s ease-in;}
+  .code{background: rgba(110,118,129,0.4);border-radius:6px;margin-left:25px;overflow-x:auto;padding: 0px 25px;}
+  .code pre{background:initial;}
+  a{color:#58a6ff;}
+  .content.read{height:initial;transition:height 2s ease-out;}
+  #top div{height:initial;}
+  //#what, #capabilities, #how, #performance, #examples{cursor:pointer;}
+  .title{cursor:pointer;}
+  .img1{width:350px;}
+  .img2{width:1000px;}
+  img{padding:20px 75px;}
+  </style>
+</head>
+<body>
+<div id="top">
+<div class="title"><span>Table of Content</span></div>
+<div class="content">
+Current version (BigInteger / BigDouble / BOperation): 6.0 / 1.1 / 1.23<br /><br />
+<ul type="bullet">
+<li><a href="#what">What BigInteger is?</a></li>
+<li><a href="#capabilities">What can Biginteger do?</a></li>
+<li><a href="#how">How to use it?</a></li>
+<ul type="bullet">
+<li><a href="#vbdisclamer">Special note for VisualStudio users (C/C++ mode)</a></li>
+<li><a href="#vbdisclamer2">Special note for VisualStudio users (CUDA mode)</a></li>
+</ul>
+<li><a href="#performance">Performance Overview</a></li>
+<li><a href="#examples">Code example</a></li>
+</ul>
+</div>
+</div>
+<div id="what">
+<div class="title"><span>What BigInteger is?</span></div>
+<div class="content" id="whatcon">BigInteger (or BI for short) is a C/C++/CUDA solution for big math.<br />
+This module was initially designed and built on 2019 by me (DoHITB) during the final paper assignment on IT degree (called TFG on Spain), to cover a RSA Cryptoanalysis<br /><br />
+BigInteger module has overcome more than 30 major changes - including performance improvements, new functionalities, and bugfixing - before reaching version 6.0.
+</div>
+</div>
+<div id="capabilities">
+<div class="title"><span>What can BigInteger do?</span></div>
+<div class="content" id="capabilitiescon">Over the time, BI has gained some functionalities:<br />
+<ul type="bullet">
+<li>Basic functionalities</li>
+<ul type="bullet">
+<li>Addition (<pre>add</pre> function)</li>
+<li>Subtraction (<pre>sub</pre> function)</li>
+<li>Multiplication (<pre>mul</pre> function)</li>
+<li>Division (<pre>dvs</pre> function)</li>
+</ul>
+<li>Advanced functionalities</li>
+<ul type="bullet">
+<li>Powering (<pre>bipow</pre> function)</li>
+<li>n-root (<pre>nqrt</pre> function)</li>
+<li>Modulus (<pre>mod</pre> function)</li>
+</ul>
+<li>Misc</li>
+<ul type="bullet">
+<li>Memory allocation for display (<pre>iniStr</pre> function)</li>
+<li>Display function (<pre>toString</pre> function)</li>
+<li>Quick values (<pre>BImemcpy</pre> function)</li>
+<li>Comparation function (<pre>equals</pre> function)</li>
+<li>Constructor function (<pre>newBI</pre> function)</li>
+</ul>
+</ul>
+On top of that, there is an expansion of BigInteger, called BigDoulbe (BD for short) that allows to work with decimal values. <br />
+To use it is as easy as to use BI, as both objects work on same architecture.
+</div>
+</div>
+<div id="how">
+<div class="title"><span>How to use it?</span></div>
+<div class="content" id="howcon">To use BigInteger, you only need to <a href="https://github.com/DoHITB/BigInteger.c/releases" target="_blank">download the source code</a> and configure a few things.<br /><br />
+All BigInteger settings are made via precompiler options (<pre>-D</pre> option on most of compilers).<br /><br />
+So, first thing is to know: <i>"Do I want to use Integer only, or Integer and Double?"</i><br />
+To use Integers only, use <pre>-D BI_STANDALONE=1</pre>; in any other case, it will allow to use both Integer and Double.<br /><br />
+Next step is: <i>"Will I be working on C? Will I be working with CUDA?"</i><br />
+To use C only version, use both <pre>-D CUDA_ENABLED=1 -D BI_STANDALONE=1</pre>; in any other case, it can only be used under C/C++ regular code.<br /><br />
+Now, we can go to some deep questions that will allow to get the maximum performance!<br /><br />
+Optional question: <i>"How many digits will my numbers have?"</i><br />
+You can define the <b>maximum</b> length for all BigIntegers by using <pre>-D C_MAX_LENGTH=n</pre>. Default value is 4096, so you can work with numbers up to 4096 digits. When <pre>C_MAX_LENGTH</pre> is defined, BigIntegers can hold <pre>n</pre> digits<br /><br />
+Also, you can ask: <i>"Do I need to stop execution on error?"</i><br />
+If you don't want that the execution halts on error, define <pre>-D BI_SERVICE=1</pre>. When done, you can access <pre>getReturnCode()</pre> function to know the execution status (being a return of 0 an OK status).<br /><br />
+Finally, ask yourself: <i>"Do I need to validate data"</i> <b>(CAUTION: use this option only when your source code is running on local)</b><br />
+Then, you can define both <pre>-D CVALIDATE=0 BI_STANDALONE=1</pre>. With this option, some validations will skip, and performance will boost a bit.<br /><br /><br />
+<span id="vbdisclamer"><u>If you are planning to work on VisualStudio with C/C++ mode only, you will need to change some settings on your project in order to make the <pre>.cu</pre> file to work:</u></span><br /><br />
+<ul type="bullet">
+<li>First, go to "Solution Explorer" tab, and right-click <pre>BigInteger.cu</pre> file and click on Properties (alternatively, select the item and click <pre>Alt + Intro</pre></li>
+</ul>
+<img src="./img/1.png" class="img1"/>
+<ul type="bullet">
+<li>On "General" menu item, set "Element type" to "C/C++ Compiler"</li>
+</ul>
+<img src="./img/2.png" class="img2"/>
+<ul type="bullet">
+<li>After this, go to "Project" menu and click on "Properties"</li>
+</ul>
+<img src="./img/3.png" class="img1"/>
+<ul type="bullet">
+<li>Go to "C/C++" option, then "Advanced", and select <pre>/TC</pre> option on the "Compile as" option</li>
+</ul>
+<img src="./img/4.png" class="img2"/>
+<br /><br /><br /><span id="vbdisclamer2"><u>When using CUDA version, ensure to do this first:</u></span><br /><br />
+<ul type="bullet">
+<li>Go to "Project" menu and click on "Properties"</li>
+</ul>
+<img src="./img/3.png" class="img1"/>
+<ul type="bullet">
+<li>Then under "CUDA/C++" menu, "Common" section, select "Yes" <pre>(-rdc=true)</pre> option on "Generate Relocatable Device Code" option:</li>
+</ul>
+<img src="./img/5.png" class="img2"/>
+</div>
+</div>
+<div id="performance">
+<div class="title"><span>Performance Overview</span></div>
+<div class="content" id="performancecon">
+BigInteger code has been widely tested around, both in accuracy and performance, with the goal of having minimal possible RAM and CPU usage while having peak performance.<br />
+On a small benchmark (that can be found below), it can perform ~15.000 operations each second on C/C++ mode, and ~70.000 operations on CUDA mode (with a <pre>&lt;&lt;&lt;64, 64&gt;&gt;&gt;</pre> cluster configuration).<br />
+A single BigInteger (with <pre>C_MAX_LENGTH=4096</pre>) is only 4104 bytes length (exact formula is <pre>C_MAX_LENGTH + sizeof(char) + sizeof(int)</pre>; and memory object it's only 160 bytes.<br /><br /><br />
+<div class="code">
+<pre>
+ 
+Calculation - Loop Start @1392; Loop End @5698 {819200 values checked on 4306 clocks} ~ 190246.171875 calcs / sec
+Calculation - Loop Start @5698; Loop End @6597 {819200 values checked on 899 clocks} ~ 911234.687500 calcs / sec --> 20.88%
+
+Calculation - Loop Start @1436; Loop End @12294 {1638400 values checked on 10858 clocks} ~ 150893.359375 calcs / sec
+Calculation - Loop Start @12294; Loop End @14441 {1638400 values checked on 2147 clocks} ~ 763111.312500 calcs / sec --> 19.77%
+
+Calculation - Loop Start @1290; Loop End @21513 {2457600 values checked on 20223 clocks} ~ 121524.992188 calcs / sec
+Calculation - Loop Start @21513; Loop End @25019 {2457600 values checked on 3506 clocks} ~ 700969.812500 calcs / sec --> 17.34%
+
+</pre>
+</div>
+</div>
+</div>
+<div id="examples">
+<div class="title"><span>Code Example</span></div>
+<div class="content code" id="examplescon">
+<pre>
+ 
+#include "stdio.h"
+#include "stdlib.h"
+#include "conio.h"
+#include "BigInteger.h"
+#include "time.h"
+#include "string.h"
+#include "cuda_runtime.h"
+#include "device_launch_parameters.h"
+
+void t_proc();
+__global__ void kernel(void* a, void* b, void* x, void* y, int* i, char* c, int n);
+
+int main() {
+  t_proc();
+
+  return 0;
+}
+
+void t_proc() {
+  //dimension & control
+  int k = 8192; //number of items
+  int perf = 100; //performance indicator
+  int print = 0; //toggle to 1 to verbose print (performance drain!)
+  int y;
+  int z;
+  int dx = 64; //CUDA config
+  int dy = 64; //CUDA config
+  float freq;
+  float str;
+  float end;
+
+  //Int Data
+  int* a = NULL;
+  int* b = NULL;
+
+  //Host Data
+  BigInteger* hostBIa = NULL;
+  BigInteger* hostBIb = NULL;
+  int* hostInt = NULL;
+  char* hostOp = NULL;
+
+  //Device Data
+  BigInteger* deviceBIa = NULL;
+  BigInteger* deviceBIb = NULL;
+  int* deviceInt = NULL;
+  char* deviceOp = NULL;
+
+  BigInteger* deviceX = NULL;
+  BigInteger* deviceY = NULL;
+
+  //printing  & aux vars
+  memory* hostM = (memory*)malloc(getMemorySize());
+  char* st1;
+  char* st2;
+  char* st3;
+  int t;
+  char bis[6];
+
+  //start the engine
+  init((void**)hostM);
+  iniStr(&st1);
+  iniStr(&st2);
+  iniStr(&st3);
+  srand(time(NULL));
+
+  if (print == 1)
+    printf("y\tva\top\tvb\tret\tres\n");
+
+  //1. Allocate host memory (k times)
+  hostBIa = (BigInteger*)malloc(sizeof(BigInteger) * k);
+  hostBIb = (BigInteger*)malloc(sizeof(BigInteger) * k);
+  hostInt = (int*)malloc(sizeof(int) * k);
+  hostOp = (char*)malloc(sizeof(char) * k);
+  a = (int*)malloc(sizeof(int) * k);
+  b = (int*)malloc(sizeof(int) * k);
+
+  //2. Give values
+  //2.1. va
+  for (y = 0; y < k; y++) {
+    t = rand() % 10000;
+    _itoa_s(t, bis, 6, 10);
+
+    newBI(&hostBIa[y], bis, 0);
+    a[y] = t;
+  }
+
+  //2.2. vb
+  for (y = 0; y < k; y++) {
+    t = rand() % 10000;
+    _itoa_s(t, bis, 6, 10);
+
+    newBI(&hostBIb[y], bis, 0);
+
+    b[y] = t;
+  }
+
+  //2.3. ret
+  for (y = 0; y < k; y++)
+    hostInt[y] = rand() % 10;
+
+  //2.4. op
+  for (y = 0; y < k; y++) {
+    t = rand() % 4;
+
+    switch (t) {
+    case 0:
+      hostOp[y] = '+';
+      break;
+    case 1:
+      hostOp[y] = '-';
+      break;
+    case 2:
+      hostOp[y] = '*';
+      break;
+    case 3:
+      hostOp[y] = '/';
+      break;
+    }
+  }
+
+  //2.5. Move it to Device
+  h2d((void**)&deviceBIa, hostBIa, k, sizeof(BigInteger));
+  h2d((void**)&deviceBIb, hostBIb, k, sizeof(BigInteger));
+  h2d((void**)&deviceX, hostBIb, k, sizeof(BigInteger));
+  h2d((void**)&deviceY, hostBIb, k, sizeof(BigInteger));
+  h2d((void**)&deviceInt, hostInt, k, sizeof(int));
+  h2d((void**)&deviceOp, hostOp, k, sizeof(char));
+
+  //3. Trace information
+  if (print == 1) {
+    for (y = 0; y < k; y++) {
+      toString(&hostBIa[y], st1);
+      toString(&hostBIb[y], st2);
+
+      printf("%i\t%s\t%c\t%s\t%i\n", y, st1, hostOp[y], st2, hostInt[y]);
+    }
+  }
+
+  //4. Calculation
+  //4.1. Int calculation
+  str = clock();
+
+  for (z = 0; z < perf; z++) {
+    for (y = 0; y < k; y++) {
+      switch (hostOp[y]) {
+      case '+':
+        a[y] += b[y];
+        break;
+      case '-':
+        a[y] -= b[y];
+        break;
+      case '*':
+        a[y] *= b[y];
+        break;
+      case'/':
+        a[y] /= b[y];
+        break;
+      }
+    }
+  }
+
+  end = clock();
+
+  if (print == 1) {
+    for (y = 0; y < k; y++) {
+      printf("\t\t\t\t\t%i\n", a[y]);
+    }
+  }
+
+  freq = ((k * perf) / (end - str)) * CLOCKS_PER_SEC;
+  printf("Calculation - Loop Start @%i; Loop End @%i {%i values checked on %i clocks} ~ %f calcs / sec\n", (int)str, (int)end, k * perf, (int)(end - str), freq);
+
+  //4.2. Host Calculation
+  str = clock();
+
+  for (z = 0; z < perf; z++) {
+    for (y = 0; y < k; y++) {
+      switch (hostOp[y]) {
+      case '+':
+        add(&hostBIa[y], &hostBIb[y], hostM);
+        break;
+      case '-':
+        sub(&hostBIa[y], &hostBIb[y], hostM);
+        break;
+      case '*':
+        mul(&hostBIa[y], &hostBIb[y], hostM);
+        break;
+      case'/':
+        dvs(&hostBIa[y], &hostBIb[y], hostM);
+        break;
+      case 's':
+        nqrt(&hostBIa[y], hostInt[y], hostM);
+        break;
+      case '^':
+        bipow(&hostBIa[y], hostInt[y], hostM);
+        break;
+      case '?':
+        equals(&hostBIa[y], &hostBIb[y], &hostInt[y]);
+        break;
+      }
+    }
+  }
+
+  end = clock();
+
+  if (print == 1) {
+    //separator
+    printf("\n");
+
+    for (y = 0; y < k; y++) {
+      toString(&hostBIa[y], st1);
+
+      printf("\t\t\t\t\t%s\n", st1);
+    }
+  }
+
+  freq = ((k * perf) / (end - str)) * CLOCKS_PER_SEC;
+  printf("Calculation - Loop Start @%i; Loop End @%i {%i values checked on %i clocks} ~ %f calcs / sec\n", (int)str, (int)end, k * perf, (int)(end - str), freq);
+
+  //4.3. Device calculation
+  str = clock();
+
+  for (z = 0; z < perf; z++) {
+    kernel << <dx, dy >> > (deviceBIa, deviceBIb, deviceX, deviceY, deviceInt, deviceOp, k);
+    cudaDeviceSynchronize();
+  }
+
+  end = clock();
+
+  //move data back
+  d2h(hostBIa, &deviceBIa, k, sizeof(BigInteger));
+
+  //print result
+  if (print == 1) {
+    //separator
+    printf("\n");
+
+    for (y = 0; y < k; y++) {
+      toString(&hostBIa[y], st1);
+
+      printf("\t\t\t\t\t%s\n", st1);
+    }
+  }
+
+  freq = ((k * perf) / (end - str)) * CLOCKS_PER_SEC;
+  printf("Calculation - Loop Start @%i; Loop End @%i {%i values checked on %i clocks} ~ %f calcs / sec\n", (int)str, (int)end, k * perf, (int)(end - str), freq);
+
+  //8. Finish
+  return;
+}
+
+//                     multi    multi    multi    multi    multi   multi
+__global__ void kernel(void* a, void* b, void* x, void* y, int* i, char* c, int n) {
+  int ind;
+  int idx = blockIdx.x * blockDim.x + threadIdx.x;
+  int inc = blockDim.x * gridDim.x;
+
+  for (ind = idx; ind < n; ind += inc) {
+    switch (c[ind]) {
+    case '+':
+      CUpAdd(&((BigInteger*)a)[ind],
+        &((BigInteger*)b)[ind]);
+      break;
+    case '-':
+      CUsub(&((BigInteger*)a)[ind],
+        &((BigInteger*)b)[ind],
+        &((BigInteger*)x)[ind]);
+      break;
+    case '*':
+      CUsMul(&((BigInteger*)a)[ind],
+        &((BigInteger*)b)[ind],
+        &((BigInteger*)x)[ind],
+        &((BigInteger*)y)[ind]);
+      break;
+    case'/':
+      CUsDvs(&((BigInteger*)a)[ind],
+        &((BigInteger*)b)[ind],
+        &((BigInteger*)x)[ind],
+        &((BigInteger*)y)[ind]);
+      break;
+    }
+  }
+}
+ 
+</pre>
+</div>
+</div>
+  <script type="text/javascript">
+  $("#what").on('click',function(){$('#whatcon').addClass('read');});
+  $("#capabilities").on('click',function(){$('#capabilitiescon').addClass('read');});
+  $("#how").on('click',function(){$('#howcon').addClass('read');});
+  $("#performance").on('click',function(){$('#performancecon').addClass('read');});
+  $("#examples").on('click',function(){$('#examplescon').addClass('read');});
+  </script>
+</body>
+</html>
