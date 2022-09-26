@@ -7,7 +7,7 @@
 #ifndef BIGINTEGER_H_
 #define BIGINTEGER_H_
 
- //MAX_LENGTH: Global varialbe to set BigInteger length.
+//MAX_LENGTH: Global varialbe to set BigInteger length.
 static int MAX_LENGTH =
 #ifdef C_MAX_LENGTH
 C_MAX_LENGTH;
