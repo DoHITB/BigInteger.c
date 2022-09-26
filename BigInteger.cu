@@ -330,15 +330,6 @@ __device__ static void CUclean(void* va) {
 }
 
 /*
- * CUiniStr. Allocates memory for a BigInteger string, to be used on toString function
- *
- * CUDA version
- */
-__device__ void CUiniStr(char** dst) {
-  *dst = (char*)malloc(sizeof(char) * 1025);
-}
-
-/*
  * CUsMul.
  *
  * Simulates a *= b
@@ -531,8 +522,7 @@ __device__ static void CUcarrySub(void* va, int carryType) {
       else
         acc = 0;
     }
-  }
-  else {
+  } else {
     for (i = 0; i < ((BigInteger*)va)->count; i++)
       if (((BigInteger*)va)->n[i] < 0)
         //normalize
@@ -816,12 +806,10 @@ __device__ void CUsDvs(void* va, void* vb, void* xa, void* xb) {
     else
       //otherwise, as a = b, a / b = 1
       memcpy(va, xb, sizeof(BigInteger));
-  }
-  else if (comp == 2) {
+  } else if (comp == 2) {
     //if a < b, then a / b = 0 (as we're on integer)
     memcpy(va, xa, sizeof(BigInteger));
-  }
-  else if (comp == 1) {
+  } else if (comp == 1) {
     //if a > b, then a / b = n
     CUhardEquals(vb, xb, &comp);
 
@@ -893,14 +881,12 @@ __device__ static void CUdivide(void* va, void* vb, void* xa, void* xb) {
         //the result is 0
         res = x;
         x = 99;
-      }
-      else if (((BigInteger*)xb)->n[((BigInteger*)xb)->count] < 0) {
+      } else if (((BigInteger*)xb)->n[((BigInteger*)xb)->count] < 0) {
         //value is negative, we got the threshold
         CUaddition(xb, vb);
         res = (x - 1);
         x = 99;
-      }
-      else {
+      } else {
         //any other scenario. Check it
         CUhardEquals(xb, vb, &eq);
 
@@ -908,8 +894,7 @@ __device__ static void CUdivide(void* va, void* vb, void* xa, void* xb) {
           //xb < vb --> found
           res = x;
           x = 99;
-        }
-        else {
+        } else {
           //xb >= vb
           CUsubtract(xb, vb);
         }
@@ -977,8 +962,7 @@ __device__ void CUsub(void* va, void* vb, void* vc) {
 
     //move result
     memcpy(va, vc, sizeof(BigInteger));
-  }
-  else {
+  } else {
     //delegate on standard function
     CUpSub(va, vb);
   }
@@ -1008,8 +992,7 @@ __device__ void CUsqrt(void* va, void* vb, void* vc, void* vd) {
     //if even = 1 means that count is even, so there's a odd number of digits
     fstep = ((BigInteger*)va)->n[((BigInteger*)va)->count] * 10 + ((BigInteger*)va)->n[((BigInteger*)va)->count - 1];
     d = ((BigInteger*)va)->count - 2;
-  }
-  else {
+  } else {
     //else, there's an even number of digits
     fstep = ((BigInteger*)va)->n[((BigInteger*)va)->count];
     d = ((BigInteger*)va)->count - 1;
@@ -1033,8 +1016,7 @@ __device__ void CUsqrt(void* va, void* vb, void* vc, void* vd) {
   if (digits == 1 || digits == 2) {
     //special case, for 1 and 2 digits, the result will have 1 digit only
     digits = 0;
-  }
-  else {
+  } else {
     digits = (digits / 2 + digits % 2) - 1;
   }
 
@@ -1098,13 +1080,11 @@ __device__ void CUsqrt(void* va, void* vb, void* vc, void* vd) {
           //if z = 1, we're on the first iteration, so previous value will be 0
           CUnewBI(vd, "0", 0);
           --z;
-        }
-        else {
+        } else {
           //get z back
           --z;
         }
-      }
-      else if (eq == 2) {
+      } else if (eq == 2) {
         //vd < vb. The value we're searching is still not this
         //increase vd and z. Increase is 10vd + 2n + 1
         //get first part for vd
@@ -1492,7 +1472,7 @@ void hardEquals(void* va, void* vb, int* ret) {
 #if BI_STANDALONE == 1
 static
 #endif
-void pAdd(void* va, void* vb, void* m) {
+ void pAdd(void* va, void* vb, void* m) {
   if (((memory*)m)->vt == NULL) {
     showError(11);
     return;
@@ -1501,8 +1481,7 @@ void pAdd(void* va, void* vb, void* m) {
   if (va == vb) {
     //add(a, a); delegate to mul(a, 2)
     sMul(va, ((memory*)m)->vt, m);
-  }
-  else {
+  } else {
     //add(a, b)
     int sig = signum(((BigInteger*)va)->n[((BigInteger*)va)->count],
       ((BigInteger*)vb)->n[((BigInteger*)vb)->count]);
@@ -1595,7 +1574,7 @@ static void addition(void* va, void* vb) {
 #if BI_STANDALONE == 1
 static
 #endif
-void carryAdd(void* va, int move, int min) {
+ void carryAdd(void* va, int move, int min) {
   int i = 0;
   int acc;
   int limit;
@@ -1643,8 +1622,7 @@ void carryAdd(void* va, int move, int min) {
     if (((BigInteger*)va)->count == MAX_LENGTH) {
       showError(1);
       return;
-    }
-    else
+    } else
       ((BigInteger*)va)->n[++(((BigInteger*)va)->count)] = acc;
   }
 }
@@ -1658,7 +1636,7 @@ void carryAdd(void* va, int move, int min) {
 #if BI_STANDALONE == 1
 static
 #endif
-void pSub(void* va, void* vb, void* m) {
+ void pSub(void* va, void* vb, void* m) {
   int sig;
   int comp;
   int sp = 0;
@@ -1671,8 +1649,7 @@ void pSub(void* va, void* vb, void* m) {
   if (va == vb) {
     //sub(a, a); result = 0
     BImemcpy(va, 0);
-  }
-  else {
+  } else {
     //sub(a, b);
     hardEquals(va, vb, &comp);
 
@@ -1692,23 +1669,9 @@ void pSub(void* va, void* vb, void* m) {
       //recalculate signum
       sig = signum(((BigInteger*)va)->n[((BigInteger*)va)->count],
         ((BigInteger*)vb)->n[((BigInteger*)vb)->count]);
-
-      /*memcpy(((memory*)m)->stmp, vb, sizeof(BigInteger)); //tmp = b;
-
-      pSub(vb, va, m);
-
-      //cambiamos el signo
-      ((BigInteger*)vb)->n[((BigInteger*)vb)->count] *= -1;
-
-      //reasignamos
-      memcpy(va, vb, sizeof(BigInteger));
-
-      //rescatamos el valor original de vb
-      memcpy(vb, ((memory*)m)->stmp, sizeof(BigInteger));*/
-    }
-    else if (comp == 0)
+    } else if (comp == 0)
       BImemcpy(va, 0);
-    //else {
+    
     //normalize sign
     if (sig == 1)
       ((BigInteger*)vb)->n[((BigInteger*)vb)->count] *= -1;
@@ -1744,7 +1707,6 @@ void pSub(void* va, void* vb, void* m) {
       memcpy(vb, ((memory*)m)->stmp, sizeof(BigInteger));
     }
   }
-  //}
 }
 
 /*
@@ -1785,12 +1747,10 @@ static void carrySub(void* va, int carryType) {
         //normalize the number
         ((BigInteger*)va)->n[i] += 10;
         acc = 1;
-      }
-      else
+      } else
         acc = 0;
     }
-  }
-  else {
+  } else {
     for (i = 0; i < ((BigInteger*)va)->count; i++)
       if (((BigInteger*)va)->n[i] < 0)
         //normalize the number
@@ -1823,7 +1783,7 @@ static void recount(void* va) {
 #if BI_STANDALONE == 1
 static
 #endif
-void sMul(void* va, void* vb, void* m) {
+ void sMul(void* va, void* vb, void* m) {
   int sig;
   int i = 0;
   int x;
@@ -1842,8 +1802,7 @@ void sMul(void* va, void* vb, void* m) {
     memcpy(((memory*)m)->mtmp, va, sizeof(BigInteger));
 
     sMul(va, ((memory*)m)->mtmp, m);
-  }
-  else {
+  } else {
     //mul(a, b)
     BImemcpy(((memory*)m)->mzero, 0);
     BImemcpy(((memory*)m)->mret, 0);
@@ -1923,8 +1882,7 @@ void sMul(void* va, void* vb, void* m) {
           //move the value to corresponding BIT
           memcpy(&((BIT*)((memory*)m)->biBIT)->BI[((BigInteger*)vb)->n[i]], ((memory*)m)->mpart, sizeof(BigInteger));
           ((BIT*)((memory*)m)->biBIT)->status[((BigInteger*)vb)->n[i]] = 1;
-        }
-        else
+        } else
           //we have a loaded BIT, so we copy it
           memcpy(((memory*)m)->mpart, &((BIT*)((memory*)m)->biBIT)->BI[((BigInteger*)vb)->n[i]], sizeof(BigInteger));
 
@@ -1989,7 +1947,7 @@ static void pMul(int pos, void* vpart) {
 #if BI_STANDALONE == 1
 static
 #endif
-void sDvs(void* va, void* vb, void* m) {
+ void sDvs(void* va, void* vb, void* m) {
   int sig;
   int comp;
 
@@ -2004,8 +1962,7 @@ void sDvs(void* va, void* vb, void* m) {
   if (va == vb) {
     //dvs(a, a)
     BImemcpy(va, 1);
-  }
-  else {
+  } else {
     //dvs(a, b)
 
     BImemcpy(((memory*)m)->dtmp, 0);
@@ -2039,8 +1996,7 @@ void sDvs(void* va, void* vb, void* m) {
       else
         //otherwise, as a = b, a / b = 1
         memcpy(va, ((memory*)m)->done, sizeof(BigInteger));
-    }
-    else if (comp == 2)
+    } else if (comp == 2)
       //if a < b, then a / b = 0 (as we're on integer)
       memcpy(va, ((memory*)m)->dtmp, sizeof(BigInteger));
     else if (comp == 1) {
@@ -2076,7 +2032,6 @@ static void divide(void* va, void* vb, void* m) {
   int eq;
   int currentBIT;
   int res = 0;
-  //int mLen;
   int added;
   int dlen;
 
@@ -2125,31 +2080,13 @@ static void divide(void* va, void* vb, void* m) {
   if (((BigInteger*)((memory*)m)->dTemp)->count == -1)
     ++((BigInteger*)((memory*)m)->dTemp)->count;
 
-  //si "b" tiene una cifra, b.len será 0 pero tenemos que restar una cifra igualmente
-  /*if (((BigInteger*)vb)->count == 0)
-    mLen = len - 1;
-  else
-    mLen = len;*/
-
-    //keep dlen for double calculation
+  //keep dlen for double calculation
   dlen = len;
 
   //init decimal point
   BI_point = 0;
 
   if (((BigInteger*)va)->k == 'd') {
-    //va is double. Slight change of division behaviour.
-    /*if (mLen == 0)
-      BI_point = mLen;
-    else
-      BI_point = mLen - 1;
-
-    len = MAX_LENGTH - 1;
-
-    if (((BigInteger*)vb)->count == 0)
-      mLen = MAX_LENGTH - 2;
-    else
-      mLen = MAX_LENGTH - 1;*/
     if (len == 0)
       BI_point = len;
     else
@@ -2200,8 +2137,7 @@ static void divide(void* va, void* vb, void* m) {
           memcpy(&((BIT*)((memory*)m)->biBIT)->BI[++currentBIT], ((memory*)m)->biTemp, sizeof(BigInteger));
           ((BIT*)((memory*)m)->biBIT)->status[currentBIT] = 1;
           added = 1;
-        }
-        else
+        } else
           added = 0;
 
         //check if it fits
@@ -2211,8 +2147,7 @@ static void divide(void* va, void* vb, void* m) {
           //if dTemp = temp
           res = currentBIT;
           x = 99;
-        }
-        else if (eq == 2) {
+        } else if (eq == 2) {
           /*
            * if dTemp < temp, as Bolzano theoreme, we already went thru dTemp = temp.
            * so, the correct value was the previous.
@@ -2228,8 +2163,7 @@ static void divide(void* va, void* vb, void* m) {
           x = 99;
         }
       }
-    }
-    else if (eq == 0)
+    } else if (eq == 0)
       //if dTemp = BIT[x], we already have the value
       res = currentBIT;
     else if (eq == 2) {
@@ -2244,8 +2178,7 @@ static void divide(void* va, void* vb, void* m) {
           //if dTemp = temp
           res = x;
           x = -99;
-        }
-        else if (eq == 1) {
+        } else if (eq == 1) {
           /*
            * if dtemp > temp, as Bolzano theoreme, we already went thru dTemp = temp,
            * so, correct value is the next one.
@@ -2266,8 +2199,7 @@ static void divide(void* va, void* vb, void* m) {
       if (((BigInteger*)((memory*)m)->dTemp)->count == 0 && ((BigInteger*)((memory*)m)->dTemp)->n[0] == 0) {
         //we found a division with remainder = 0. There's no more data to treat and we finish
         i = len + 1;
-      }
-      else
+      } else
         //There's still data to treat, add it
         ((BigInteger*)((memory*)m)->dret)->n[len - i] = res;
     }
@@ -2292,7 +2224,7 @@ static void divide(void* va, void* vb, void* m) {
 #if BI_STANDALONE == 1
 static
 #endif
-void sNqrt(void* va, int n, void* m) {
+ void sNqrt(void* va, int n, void* m) {
   int lmax = 0;
   int isEq = 0;
 
@@ -2360,8 +2292,7 @@ void sNqrt(void* va, int n, void* m) {
         else
           //on the opposite case, we reached maximum possible aproximation
           isEq = 0;
-      }
-      else
+      } else
         //if lmax is lower than 0, we reached maximum possible approximation
         isEq = 0;
     }
@@ -2689,7 +2620,7 @@ void clean(void* va) {
 #if CUDA_ENABLED == 1
 __host__ __device__
 #endif
-static void showError(int k) {
+ static void showError(int k) {
 #if BI_SERVICE == 1
   BIReturnCode = k;
 #else
