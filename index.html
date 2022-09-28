@@ -368,7 +368,7 @@ void t_proc() {
   str = clock();
 
   for (z = 0; z < perf; z++) {
-    kernel << <dx, dy >> > (deviceBIa, deviceBIb, deviceX, deviceY, deviceInt, deviceOp, k);
+    kernel &lt;&lt;&lt;dx, dy&gt;&gt;&gt;(deviceBIa, deviceBIb, deviceX, deviceY, deviceInt, deviceOp, k);
     cudaDeviceSynchronize();
   }
 
